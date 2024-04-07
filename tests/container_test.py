@@ -1,4 +1,5 @@
 from typing import Any
+from diy import Container
 from diy.exception import UninstanciableTypeError
 from diy.container import RuntimeContainer, Specification
 import pytest
@@ -88,3 +89,19 @@ def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spe
     container = RuntimeContainer(spec)
     instance = container.resolve(ImplicitlyResolvesApiClient)
     assert isinstance(instance, ImplicitlyResolvesApiClient)
+
+
+def test_it_can_inject_itself_via_protocols():
+    spec = Specification()
+    container = RuntimeContainer(spec)
+
+    # TODO: Not sure if adding to the spec _after_ handing it into a container
+    #       should have an effect on the container. Could be prevented by deep-
+    #       copying the spec in the container constructor, but for this
+    #       specific use-case, it is convenient. Though I guess it feelds more
+    #       proper to support injecting builder arguments from the container
+    #       instead.
+    spec.add(Container, lambda: container)
+
+    instance = container.resolve(Container)
+    assert instance == container
