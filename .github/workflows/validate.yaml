@@ -27,6 +27,8 @@ jobs:
       # TODO: Shift this step to the back
       - name: Deploy MkDocs
         uses: mhausenblas/mkdocs-deploy-gh-pages@1.26
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Test
         run: |
           coverage run -m pytest

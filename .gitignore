@@ -8,3 +8,9 @@ wheels/
 
 # venv
 .venv
+
+# coverage
+.coverage*
+
+# mkdocs
+/site
