@@ -2,7 +2,7 @@
 site_name: diy
 # repo_name: NiclasvanEyk/diy
 # repo_url: https://github.com/NiclasvanEyk/diy
-edit_uri: edit/main/docs/
+# edit_uri: edit/main/docs/
 theme:
   name: material
   palette:
