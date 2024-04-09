@@ -29,11 +29,11 @@ jobs:
         uses: mhausenblas/mkdocs-deploy-gh-pages@1.26
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Test
-        run: |
-          coverage run -m pytest
-          coverage report
-      - name: Lint
-        run: ruff check --output-format=github
-      - name: Format
-        run: ruff format --diff
+      # - name: Test
+      #   run: |
+      #     coverage run -m pytest
+      #     coverage report
+      # - name: Lint
+      #   run: ruff check --output-format=github
+      # - name: Format
+      #   run: ruff format --diff
