@@ -18,6 +18,7 @@ click==8.1.7
     # via mkdocs
 colorama==0.4.6
     # via mkdocs-material
+coverage==7.4.4
 ghp-import==2.1.0
     # via mkdocs
 idna==3.6
