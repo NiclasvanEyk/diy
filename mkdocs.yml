@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+site_name: diy
+# repo_name: NiclasvanEyk/diy
+# repo_url: https://github.com/NiclasvanEyk/diy
+edit_uri: edit/main/docs/
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme)"
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: yellow
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: yellow
+  # icon:
+  #   repo: fontawesome/brands/github
+  features:
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.sections
+
+nav:
+  - Introduction: "index.md"
+  - Guide:
+      - "guide/index.md"
+      - Specifications: "guide/specifications.md"
+      - Containers: "guide/containers.md"
+  - Examples:
+      - "examples/index.md"
+      - Wheather API: "examples/wheather.md"
+  - Reference:
+      - Guiding Principles: "reference/guiding-principles.md"
+      - API Docs: "reference/api-docs.md"
+      - Changelog: "reference/changelog.md"
+
+markdown_extensions:
+  # Callouts / Alerts
+  - admonition
+  # Permalinks for headings when clicking
+  - toc:
+      permalink: "#"
+  # Syntax highlighting
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

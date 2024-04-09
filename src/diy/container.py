@@ -1,43 +1,33 @@
 from __future__ import annotations
 
-from inspect import FullArgSpec, getfullargspec, signature, Parameter
-from typing import Callable, override, Any
+from inspect import FullArgSpec, Parameter, getfullargspec, signature
+from typing import Any, Callable, Protocol, override
 
-from diy import Container
-from diy.exception import UninstanciableTypeError, UnresolvableDependencyError
+from diy.errors import UninstanciableTypeError, UnresolvableDependencyError
+from diy.specification import Specification
+
+
+class Container(Protocol):
+    # TODO: Write documentation
+    def resolve[T](self, abstract: type[T]) -> T:
+        pass
+
+    def call[R](self, function: Callable[..., R]) -> R:
+        pass
 
 
 def requires_arguments(spec: FullArgSpec) -> bool:
     if len(spec.args) == 0:
         return False
 
-    if len(spec.args) == 1 and spec.args == ["self"]:
-        return False
-
-    return True
+    return not (len(spec.args) == 1 and spec.args == ["self"])
 
 
-def can_be_instanciated(spec: FullArgSpec) -> bool:
-    if len(spec.args) <= 0:
-        return False
-
-    return spec.args[0] == "self"
-
-
-class Specification:
-    """
-    Registers functions that construct certain types.
-    """
-
-    builders: dict[type[Any], Callable[..., Any]] = {}
-
-    def add[T](self, abstract: type[T], builder: Callable[[], T]) -> None:
-        self.builders[abstract] = builder
-
-    def get[T](self, abstract: type[T]) -> Callable[[], T] | None:
-        if abstract in self.builders:
-            return self.builders[abstract]
-        return None
+def assert_is_instantiable(abstract: type[Any]) -> None:
+    # TODO: Maybe we can also use `signature` here
+    spec = getfullargspec(abstract.__init__)
+    if len(spec.args) <= 0 or spec.args[0] == "self":
+        raise UninstanciableTypeError(abstract)
 
 
 class RuntimeContainer(Container):
@@ -53,21 +43,16 @@ class RuntimeContainer(Container):
 
     @override
     def resolve[T](self, abstract: type[T]) -> T:
-        constructor = abstract.__init__
-        spec = getfullargspec(constructor)
-
-        if not can_be_instanciated(spec):
-            raise UninstanciableTypeError(abstract)
-
+        # Maybe we already know how to build this
         builder = self.spec.get(abstract)
         if builder is not None:
             return builder()
 
-        # Maybe we can simplify this to just resolve empty args and kwargs
-        if not requires_arguments(spec):
-            return abstract()
+        # if not first check if it even can be built
+        assert_is_instantiable(abstract)
 
-        [args, kwargs] = self.resolve_args(constructor)
+        # if yes, try to resolve it based on the knowledge we have
+        [args, kwargs] = self.resolve_args(abstract.__init__)
         return abstract(*args, **kwargs)
 
     def resolve_args(
@@ -89,7 +74,7 @@ class RuntimeContainer(Container):
                 # HINT: Take a look at Signature.apply_defaults for supporting
                 #       positional argument defaults
                 # TODO: Maybe introduce a more specific Exception
-                raise UnresolvableDependencyError()
+                raise UnresolvableDependencyError
 
             if parameter.default is not Parameter.empty:
                 continue  # We will just use the default from python
@@ -97,12 +82,12 @@ class RuntimeContainer(Container):
             abstract = parameter.annotation
             if abstract is Parameter.empty:
                 # TODO: Maybe introduce a more specific Exception
-                raise UnresolvableDependencyError()
+                raise UnresolvableDependencyError
 
             builder = self.spec.get(abstract)
             if builder is None:
                 # TODO: Maybe introduce a more specific Exception
-                raise UnresolvableDependencyError()
+                raise UnresolvableDependencyError
 
             kwargs[name] = builder()
 

@@ -1,16 +1,19 @@
+from __future__ import annotations
+
 from typing import Any
-from diy import Container
-from diy.exception import UninstanciableTypeError
-from diy.container import RuntimeContainer, Specification
+
 import pytest
+
+from diy import Container, RuntimeContainer, Specification
+from diy.errors import UninstanciableTypeError
 
 
 class ConstructurWithoutSelf:
-    def __init__():
+    def __init__() -> None:
         pass
 
 
-def test_container_reports_uninstantiable_types():
+def test_container_reports_uninstantiable_types() -> None:
     container = RuntimeContainer()
 
     with pytest.raises(UninstanciableTypeError):
@@ -22,7 +25,7 @@ class NoConstructor:
 
 
 class ConstructorWithOnlySelf:
-    def __init__(self):
+    def __init__(self) -> None:
         self.something = "foo"
 
 
@@ -35,15 +38,17 @@ class ConstructorWithOnlySelf:
 )
 def test_container_can_instantiate_constructors_that_require_no_arguments(
     abstract: type[Any],
-):
+) -> None:
     container = RuntimeContainer()
     instance = container.resolve(abstract)
     assert isinstance(instance, abstract)
 
 
-def test_container_can_instantiate_constructors_that_only_require_default_arguments():
+def test_container_can_instantiate_constructors_that_only_require_default_arguments() -> (
+    None
+):
     class ConstructorWithOneDefaultArgument:
-        def __init__(self, name: str = "default name"):
+        def __init__(self, name: str = "default name") -> None:
             self.name = name
 
     container = RuntimeContainer()
@@ -51,7 +56,7 @@ def test_container_can_instantiate_constructors_that_only_require_default_argume
     assert isinstance(instance, ConstructorWithOneDefaultArgument)
 
 
-def test_container_actually_resolves_the_default_arguments():
+def test_container_actually_resolves_the_default_arguments() -> None:
     container = RuntimeContainer()
 
     sentinel = object()
@@ -68,7 +73,7 @@ class ApiClient:
         self.token = token
 
 
-def test_container_can_instantiate_kwargs_only_constructors():
+def test_container_can_instantiate_kwargs_only_constructors() -> None:
     spec = Specification()
     spec.add(ApiClient, lambda: ApiClient("test"))
 
@@ -82,7 +87,9 @@ class ImplicitlyResolvesApiClient:
         self.api = api
 
 
-def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spec():
+def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spec() -> (
+    None
+):
     spec = Specification()
     spec.add(ApiClient, lambda: ApiClient("test"))
 
@@ -91,7 +98,7 @@ def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spe
     assert isinstance(instance, ImplicitlyResolvesApiClient)
 
 
-def test_it_can_inject_itself_via_protocols():
+def test_it_can_inject_itself_via_protocols() -> None:
     spec = Specification()
     container = RuntimeContainer(spec)
 

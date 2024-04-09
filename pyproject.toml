@@ -2,9 +2,7 @@
 name = "diy"
 version = "0.1.0"
 description = "Add your description here"
-authors = [
-    { name = "Niclas van Eyk", email = "niclas.eyk@gmail.com" }
-]
+authors = [{ name = "Niclas van Eyk", email = "niclas.eyk@gmail.com" }]
 dependencies = []
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -17,6 +15,8 @@ build-backend = "hatchling.build"
 managed = true
 dev-dependencies = [
     "pytest>=8.1.1",
+    "ruff>=0.3.5",
+    "mkdocs-material>=9.5.17",
 ]
 
 [tool.hatch.metadata]
@@ -24,3 +24,46 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/diy"]
+
+[tool.pytest]
+addopts = "--doctest-modules"
+
+[tool.ruff]
+src = ["src"]
+
+[tool.ruff.lint]
+preview = true
+select = [
+    "F",
+    "I",
+    "UP",
+    "N",
+    "YTT",
+    "ANN",
+    "ASYNC",
+    "S",
+    "BLE",
+    "FBT",
+    "B",
+    "C4",
+    "DTZ",
+    "T10",
+    "EM",
+    "FA",
+    "LOG",
+    "G",
+    "INP",
+    "PIE",
+    "T20",
+    "PT",
+    "RSE",
+    "RET",
+    "SLF",
+    "SIM",
+    "TID",
+    "PTH",
+    "PLE",
+    "FURB",
+    "RUF",
+]
+ignore = ["ANN101", "PT013", "S101"]
