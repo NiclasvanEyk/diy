@@ -9,7 +9,7 @@ from diy.errors import UninstanciableTypeError
 
 
 class ConstructurWithoutSelf:
-    def __init__() -> None:
+    def __init__() -> None:  # type: ignore[reportSelfClsParameterName]
         pass
 
 
@@ -26,6 +26,7 @@ class NoConstructor:
 
 class ConstructorWithOnlySelf:
     def __init__(self) -> None:
+        super().__init__()
         self.something = "foo"
 
 
@@ -49,6 +50,7 @@ def test_container_can_instantiate_constructors_that_only_require_default_argume
 ):
     class ConstructorWithOneDefaultArgument:
         def __init__(self, name: str = "default name") -> None:
+            super().__init__()
             self.name = name
 
     container = RuntimeContainer()
@@ -61,7 +63,7 @@ def test_container_actually_resolves_the_default_arguments() -> None:
 
     sentinel = object()
 
-    def my_function(my_argument=sentinel):
+    def my_function(my_argument: object = sentinel) -> object:
         return my_argument
 
     result = container.call(my_function)
@@ -70,12 +72,13 @@ def test_container_actually_resolves_the_default_arguments() -> None:
 
 class ApiClient:
     def __init__(self, token: str) -> None:
+        super().__init__()
         self.token = token
 
 
 def test_container_can_instantiate_kwargs_only_constructors() -> None:
     spec = Specification()
-    spec.add(ApiClient, lambda: ApiClient("test"))
+    spec.builders.add(ApiClient, lambda: ApiClient("test"))
 
     container = RuntimeContainer(spec)
     instance = container.resolve(ApiClient)
@@ -84,6 +87,7 @@ def test_container_can_instantiate_kwargs_only_constructors() -> None:
 
 class ImplicitlyResolvesApiClient:
     def __init__(self, api: ApiClient) -> None:
+        super().__init__()
         self.api = api
 
 
@@ -91,7 +95,7 @@ def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spe
     None
 ):
     spec = Specification()
-    spec.add(ApiClient, lambda: ApiClient("test"))
+    spec.builders.add(ApiClient, lambda: ApiClient("test"))
 
     container = RuntimeContainer(spec)
     instance = container.resolve(ImplicitlyResolvesApiClient)
@@ -108,7 +112,7 @@ def test_it_can_inject_itself_via_protocols() -> None:
     #       specific use-case, it is convenient. Though I guess it feelds more
     #       proper to support injecting builder arguments from the container
     #       instead.
-    spec.add(Container, lambda: container)
+    spec.builders.add(Container, lambda: container)
 
     instance = container.resolve(Container)
     assert instance == container

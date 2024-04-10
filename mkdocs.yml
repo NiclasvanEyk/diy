@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: diy
-# repo_name: NiclasvanEyk/diy
-# repo_url: https://github.com/NiclasvanEyk/diy
-# edit_uri: edit/main/docs/
+repo_name: NiclasvanEyk/diy
+repo_url: https://github.com/NiclasvanEyk/diy
+edit_uri: edit/main/docs/
 theme:
   name: material
   palette:
@@ -15,9 +15,11 @@ theme:
       scheme: slate
       primary: black
       accent: yellow
-  # icon:
-  #   repo: fontawesome/brands/github
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/hammer-screwdriver
   features:
+    - content.action.edit
     - navigation.footer
     - navigation.indexes
     - navigation.instant
