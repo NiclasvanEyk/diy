@@ -1,6 +1,6 @@
 # Introduction
 
-`diy` is a [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection)
+`diy` (/ˌdi.aɪˈwaɪ/) is a [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection)
 container that reads Pythons native type annotations, so you don't have to 
 clutter your code with `Annotated` or other library specific markers.
 
