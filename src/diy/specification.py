@@ -126,6 +126,9 @@ class Partials:
     Add and retrieve builder functions for constructor paramters of types.
     """
 
+    # TODO: The doctests don't represent realistic use cases.
+    #       Maybe they should utilize a container?
+
     _by_type: defaultdict[type[Any], dict[str, Callable[..., Any]]]
 
     def __init__(self) -> None:

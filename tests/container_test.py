@@ -156,3 +156,27 @@ def test_raises_exception_when_registering_partial_for_unannotated_parameter() -
 
     with pytest.raises(MissingConstructorKeywordTypeAnnotationError):
         container.resolve(UnannotatedGreeter)
+
+
+def test_it_can_resolve_when_all_args_have_registered_partials() -> None:
+    spec = Specification()
+    spec.partials.add(Greeter, "name", str, lambda: "foo")
+
+    container = RuntimeContainer(spec)
+    greeter = container.resolve(Greeter)
+    assert isinstance(greeter, Greeter)
+
+
+def test_it_prefers_partial_builders_to_default_args() -> None:
+    class DefaultGreeter:
+        def __init__(self, name: str = "default") -> None:
+            self.name = name
+
+    spec = Specification()
+    spec.partials.add(DefaultGreeter, "name", str, lambda: "override")
+    container = RuntimeContainer(spec)
+
+    greeter = container.resolve(DefaultGreeter)
+
+    assert isinstance(greeter, DefaultGreeter)
+    assert greeter.name == "override"

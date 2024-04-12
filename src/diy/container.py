@@ -48,11 +48,11 @@ class RuntimeContainer(Container):
         assert_is_instantiable(abstract)
 
         # if yes, try to resolve it based on the knowledge we have
-        [args, kwargs] = self.resolve_args(abstract.__init__)
+        [args, kwargs] = self.resolve_args(abstract.__init__, abstract)
         return abstract(*args, **kwargs)
 
     def resolve_args(
-        self, subject: Callable[..., Any]
+        self, subject: Callable[..., Any], requestor: type[Any] | None = None
     ) -> tuple[list[Any], dict[str, Any]]:
         spec = signature(subject)
         args: list[Any] = []
@@ -77,6 +77,12 @@ class RuntimeContainer(Container):
                 #       positional argument defaults
                 # TODO: Support other cases
                 raise UnsupportedParameterTypeError
+
+            if requestor is not None:
+                partial_builder = self.spec.partials.get(requestor, name)
+                if partial_builder is not None:
+                    kwargs[name] = partial_builder()
+                    continue
 
             if parameter.default is not Parameter.empty:
                 continue  # We will just use the default from python
