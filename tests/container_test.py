@@ -5,11 +5,20 @@ from typing import Any
 import pytest
 
 from diy import Container, RuntimeContainer, Specification
-from diy.errors import UninstanciableTypeError
+from diy.errors import (
+    MissingConstructorKeywordTypeAnnotationError,
+    UninstanciableTypeError,
+    UnresolvableDependencyError,
+)
 
 
 class ConstructurWithoutSelf:
     def __init__() -> None:  # type: ignore[reportSelfClsParameterName]
+        pass
+
+
+class ConstructorWithWeirdArgs:
+    def __init__(foo) -> None:  # type: ignore[reportSelfClsParameterName]
         pass
 
 
@@ -18,6 +27,9 @@ def test_container_reports_uninstantiable_types() -> None:
 
     with pytest.raises(UninstanciableTypeError):
         container.resolve(ConstructurWithoutSelf)
+
+    with pytest.raises(UninstanciableTypeError):
+        container.resolve(ConstructorWithWeirdArgs)
 
 
 class NoConstructor:
@@ -102,6 +114,20 @@ def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spe
     assert isinstance(instance, ImplicitlyResolvesApiClient)
 
 
+class Greeter:
+    def __init__(self, name: str) -> None:
+        super().__init__()
+        self.name = name
+
+
+def test_it_throws_when_type_cannot_be_resolved() -> None:
+    spec = Specification()
+    container = RuntimeContainer(spec)
+
+    with pytest.raises(UnresolvableDependencyError):
+        container.resolve(Greeter)
+
+
 def test_it_can_inject_itself_via_protocols() -> None:
     spec = Specification()
     container = RuntimeContainer(spec)
@@ -116,3 +142,17 @@ def test_it_can_inject_itself_via_protocols() -> None:
 
     instance = container.resolve(Container)
     assert instance == container
+
+
+class UnannotatedGreeter:
+    def __init__(self, name) -> None:
+        super().__init__()
+        self.name = name
+
+
+def test_raises_exception_when_registering_partial_for_unannotated_parameter() -> None:
+    spec = Specification()
+    container = RuntimeContainer(spec)
+
+    with pytest.raises(MissingConstructorKeywordTypeAnnotationError):
+        container.resolve(UnannotatedGreeter)

@@ -35,6 +35,9 @@ packages = ["src/diy"]
 [tool.pytest]
 addopts = "--doctest-modules"
 
+[tool.coverage.run]
+omit = ["*_test.py"]
+
 [tool.ruff]
 src = ["src"]
 

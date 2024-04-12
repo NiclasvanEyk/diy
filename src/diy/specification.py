@@ -204,7 +204,7 @@ class Partials:
             self._by_type[abstract][name] = builder
 
             def inner() -> Callable[..., P]:
-                return builder
+                return builder  # pragma: no cover
 
             return inner
 

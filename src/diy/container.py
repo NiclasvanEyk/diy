@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Callable
-from inspect import FullArgSpec, Parameter, getfullargspec, signature
+from inspect import Parameter, getfullargspec, signature
 from typing import Any, Protocol, override
 
 from diy.errors import (
@@ -19,11 +19,11 @@ class Container(Protocol):
 
     @abstractmethod
     def resolve[T](self, abstract: type[T]) -> T:
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def call[R](self, function: Callable[..., R]) -> R:
-        pass
+        pass  # pragma: no cover
 
 
 class RuntimeContainer(Container):
@@ -85,6 +85,13 @@ class RuntimeContainer(Container):
             if abstract is Parameter.empty:
                 raise MissingConstructorKeywordTypeAnnotationError(abstract, name)
 
+            # TODO: This can't happen right now, but it might be better dx if
+            #       we throw a different error when ALL args of a constructor
+            #       cannot be resolved. Maybe we could also include the
+            #       "resolver chain" in the error message, so users know WHY a
+            #       type was resolved. That would also make this code path
+            #       irrelevant.
+
             builder = self.spec.builders.get(abstract)
             if builder is None:
                 raise UnresolvableDependencyError(
@@ -99,13 +106,6 @@ class RuntimeContainer(Container):
     def call[R](self, function: Callable[..., R]) -> R:
         [args, kwargs] = self.resolve_args(function)
         return function(*args, **kwargs)
-
-
-def requires_arguments(spec: FullArgSpec) -> bool:
-    if len(spec.args) == 0:
-        return False
-
-    return not (len(spec.args) == 1 and spec.args == ["self"])
 
 
 def assert_is_instantiable(abstract: type[Any]) -> None:
