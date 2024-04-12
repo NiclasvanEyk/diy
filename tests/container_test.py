@@ -18,7 +18,7 @@ class ConstructurWithoutSelf:
 
 
 class ConstructorWithWeirdArgs:
-    def __init__(foo) -> None:  # type: ignore[reportSelfClsParameterName]
+    def __init__(foo) -> None:  # noqa: N805
         pass
 
 
@@ -145,7 +145,7 @@ def test_it_can_inject_itself_via_protocols() -> None:
 
 
 class UnannotatedGreeter:
-    def __init__(self, name) -> None:
+    def __init__(self, name) -> None:  # noqa: ANN001
         super().__init__()
         self.name = name
 
