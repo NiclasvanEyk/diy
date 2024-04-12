@@ -25,6 +25,7 @@ dev-dependencies = [
 
 [tool.rye.scripts]
 tests = "pytest --cov --cov-branch --doctest-modules"
+docs = "mkdocs serve"
 
 [tool.hatch.metadata]
 allow-direct-references = true

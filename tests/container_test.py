@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Annotated, Any
 
 import pytest
 
@@ -180,3 +180,32 @@ def test_it_prefers_partial_builders_to_default_args() -> None:
 
     assert isinstance(greeter, DefaultGreeter)
     assert greeter.name == "override"
+
+
+def test_it_can_build_types_based_on_annotations() -> None:
+    class CloudBucket:
+        def __init__(self, path: string) -> None:
+            self.path = path
+
+    ProfilePicturesBucket = Annotated[CloudBucket, "profile-pictures"]
+    OpenGraphImagesBucket = Annotated[CloudBucket, "og-images"]
+
+    class UserService:
+        def __init__(self, bucket: ProfilePicturesBucket) -> None:
+            self.bucket = bucket
+
+    class OgImageGenerator:
+        def __init__(self, bucket: OpenGraphImagesBucket) -> None:
+            self.bucket = bucket
+
+    spec = Specification()
+    spec.builders.add(ProfilePicturesBucket, lambda: CloudBucket("s3:profile_pictures"))
+    spec.builders.add(OgImageGenerator, lambda: CloudBucket("do:og-images"))
+
+    container = RuntimeContainer(spec)
+
+    user_service = container.resolve(UserService)
+    assert user_service.bucket.path == "s3:profile_pictures"
+
+    generator = container.resolve(OgImageGenerator)
+    assert generator.bucket.path == "do:og-images"
