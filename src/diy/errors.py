@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from diy.internal.display import qualified_name
+
 
 class DiyError(Exception):
     pass
@@ -11,7 +13,7 @@ class UninstanciableTypeError(DiyError):
     abstract: type[Any]
 
     def __init__(self, abstract: type[Any]) -> None:
-        message = f"Can't instantiate type '{abstract.__qualname__}', since it's __init__ method does not accept 'self' as its first argument!"
+        message = f"Can't instantiate type '{qualified_name(abstract)}', since it's __init__ method does not accept 'self' as its first argument!"
         super().__init__(message)
         self.abstract = abstract
 
@@ -43,9 +45,11 @@ class UnresolvableDependencyError(DiyError):
     """
 
     def __init__(self, abstract: type[Any], known: list[type[Any]] | list[str]) -> None:
-        super().__init__(f"Failed to resolve an instance of '{abstract.__qualname__}'")
+        super().__init__(
+            f"Failed to resolve an instance of '{qualified_name(abstract)}'"
+        )
         self.abstract = abstract
-        enumeration = "\n".join([f"- {x.__qualname__}" for x in known])
+        enumeration = "\n".join([f"- {qualified_name(x)}" for x in known])
         note = f"Known types are:\n{enumeration}"
         self.add_note(note)
 
@@ -85,13 +89,13 @@ to provide proper annotations.
 
 class MissingConstructorKeywordArgumentError(DiyError):
     def __init__(self, abstract: type[Any], name: str) -> None:
-        message = f"Tried to register partial builder for parameter '{abstract.__qualname__}'::'{name}' of type , but its __init__ function does not have a keyword argument named '{name}'!"
+        message = f"Tried to register partial builder for parameter '{qualified_name(abstract)}'::'{name}' of type , but its __init__ function does not have a keyword argument named '{name}'!"
         super().__init__(message)
 
 
 class MissingConstructorKeywordTypeAnnotationError(DiyError):
     def __init__(self, abstract: type[Any], name: str) -> None:
-        message = f"Tried to build an instance of '{abstract.__qualname__}', but the '{name}' parameter is missing a type annotation."
+        message = f"Tried to build an instance of '{qualified_name(abstract)}', but the '{name}' parameter is missing a type annotation."
         super().__init__(message)
         self.add_note(
             "Either register an explicit builder function via diy.Specification.builders.add, or provide a type annotation for a type that is already known or can be automatically resolved."
@@ -100,8 +104,12 @@ class MissingConstructorKeywordTypeAnnotationError(DiyError):
 
 class InvalidConstructorKeywordArgumentError(DiyError):
     def __init__(
-        self, abstract: type[Any], name: str, provided: type[Any], required: type[Any]
+        self,
+        abstract: type[Any],
+        name: str,
+        provided: type[Any] | str,
+        required: type[Any],
     ) -> None:
-        target = f"'{abstract.__qualname__}::{name}"
-        message = f"Tried to register partial builder for '{target}'. The builder returns '{provided.__qualname__}', but '{target}' accepts '{required.__qualname__}'!"
+        target = f"{qualified_name(abstract)}::{name}"
+        message = f"Tried to register partial builder for {target}. The builder returns '{qualified_name(provided)}', but {target} accepts '{qualified_name(required)}'!"
         super().__init__(message)

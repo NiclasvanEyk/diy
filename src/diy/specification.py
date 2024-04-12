@@ -10,6 +10,7 @@ from diy.errors import (
     MissingConstructorKeywordArgumentError,
     MissingReturnTypeAnnotationError,
 )
+from diy.internal.display import qualified_name
 
 
 class Builders:
@@ -36,16 +37,14 @@ class Builders:
         ...     print(f"Hello {self.name}!")
         ...
         >>> spec = Specification()
-        >>> spec.builders.add(Greeter, lambda: Greeter("Ella"))
+        >>> _ = spec.builders.add(Greeter, lambda: Greeter("Ella"))
         ...
         >>> builder = spec.builders.get(Greeter)
         >>> instance = builder()
         >>> instance.greet()
         Hello Ella!
         """
-        if not isinstance(abstract, str):
-            abstract = abstract.__qualname__
-        self._by_type[abstract] = builder
+        self._by_type[qualified_name(abstract)] = builder
         return self
 
     def decorate[T](self, builder: Callable[..., T]) -> Callable[..., T]:
@@ -74,9 +73,7 @@ class Builders:
         Hello Ella!
         """
         abstract = assert_annotates_return_type(builder)
-        if not isinstance(abstract, str):
-            abstract = abstract.__qualname__
-        self._by_type[abstract] = builder
+        self._by_type[qualified_name(abstract)] = builder
         return builder
 
     def get[T](self, abstract: type[T]) -> Callable[[], T] | None:
@@ -93,16 +90,14 @@ class Builders:
         ...     print(f"Hello {self.name}!")
         ...
         >>> spec = Specification()
-        >>> spec.builders.add(Greeter, lambda: Greeter("Ella"))
+        >>> _ = spec.builders.add(Greeter, lambda: Greeter("Ella"))
         ...
         >>> builder = spec.builders.get(Greeter)
         >>> instance = builder()
         >>> instance.greet()
         Hello Ella!
         """
-        if not isinstance(abstract, str):
-            abstract = abstract.__qualname__
-        return self._by_type.get(abstract)
+        return self._by_type.get(qualified_name(abstract))
 
     def known_types(self) -> list[str]:
         """
@@ -115,9 +110,12 @@ class Builders:
         >>> class C: pass
         ...
         >>> spec = Specification()
-        >>> spec.builders.add(A, lambda: A())
-        >>> spec.builders.add(B, lambda: B())
-        >>> spec.builders.add(C, lambda: C())
+        >>> _ = (
+        ...   spec.builders
+        ...   .add(A, lambda: A())
+        ...   .add(B, lambda: B())
+        ...   .add(C, lambda: C())
+        ... )
         >>> assert spec.builders.known_types() == ["A", "B", "C"]
         """
         return list(self._by_type.keys())
@@ -146,9 +144,8 @@ class Partials:
         abstract type.
 
         >>> from diy import Specification
-        ..
-        >>> class Simple:
-        >>>   pass
+        ...
+        >>> class Simple: pass
         ...
         >>> class Greeter:
         ...   def __init__(self, name: str, simple: Simple):
@@ -159,7 +156,7 @@ class Partials:
         ...     print(f"Hello {self.name}!")
         ...
         >>> spec = Specification()
-        >>> spec.partials.add(Greeter, "name", str, lambda: "Ella")
+        >>> _ = spec.partials.add(Greeter, "name", str, lambda: "Ella")
         ...
         >>> builder = spec.partials.get(Greeter, "name")
         >>> instance = builder()
@@ -177,9 +174,8 @@ class Partials:
         abstract type by decorating it.
 
         >>> from diy import Specification
-        ..
-        >>> class Simple:
-        >>>   pass
+        ...
+        >>> class Simple: pass
         ...
         >>> class Greeter:
         ...   def __init__(self, name: str, simple: Simple):
@@ -191,7 +187,7 @@ class Partials:
         ...
         >>> spec = Specification()
         ...
-        >>> spec.partials.decorate(Greeter, "name")
+        >>> @spec.partials.decorate(Greeter, "name")
         ... def build_greeter_name() -> str:
         ...   return "Ella"
         ...
@@ -201,7 +197,7 @@ class Partials:
         Ella
         """
 
-        def decorator(builder: Callable[..., P]) -> Callable[..., P]:
+        def decorator(builder: Callable[..., P]) -> Callable[..., Callable[..., P]]:
             builder_returns = assert_annotates_return_type(builder)
             parameter = assert_constructor_has_parameter(abstract, name)
             assert_parameter_annotation_matches(abstract, parameter, builder_returns)
@@ -213,6 +209,12 @@ class Partials:
             return inner
 
         return decorator
+
+    def get(self, abstract: type[Any], name: str) -> Callable[..., Any] | None:
+        """
+        Retrieve a bound partial builder function.
+        """
+        return self._by_type[abstract].get(name)
 
 
 class Specification:
@@ -242,7 +244,7 @@ def assert_constructor_has_parameter(abstract: type[Any], name: str) -> Paramete
 
 
 def assert_parameter_annotation_matches(
-    abstract: type[Any], parameter: Parameter, builder_returns: type[Any]
+    abstract: type[Any], parameter: Parameter, builder_returns: type[Any] | str
 ) -> None:
     accepts = parameter.annotation
     if accepts is Parameter.empty:
@@ -250,7 +252,7 @@ def assert_parameter_annotation_matches(
         return
 
     # TODO: We need to check assignability here! Maybe defer to a third-party library?
-    if accepts is not builder_returns:
+    if qualified_name(accepts) != qualified_name(builder_returns):
         raise InvalidConstructorKeywordArgumentError(
             abstract, parameter.name, builder_returns, accepts
         )

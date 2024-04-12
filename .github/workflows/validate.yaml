@@ -25,9 +25,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.lock -r requirements-dev.lock
       - name: Test
-        run: |
-          coverage run -m pytest
-          coverage report
+        run: pytest --cov --doctest-modules
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
