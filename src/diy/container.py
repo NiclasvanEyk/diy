@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from collections.abc import Callable
 from inspect import FullArgSpec, Parameter, getfullargspec, signature
 from typing import Any, Protocol, override
@@ -15,9 +16,12 @@ from diy.specification import Specification
 
 class Container(Protocol):
     # TODO: Write documentation
+
+    @abstractmethod
     def resolve[T](self, abstract: type[T]) -> T:
         pass
 
+    @abstractmethod
     def call[R](self, function: Callable[..., R]) -> R:
         pass
 
