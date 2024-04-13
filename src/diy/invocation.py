@@ -83,4 +83,4 @@ class PendingFunctionCall[**P, R]:
         args = []  # TODO: Support non-keyword arguments
         kwargs = self.parameters
 
-        return self.subject(*args, **kwargs)
+        return self.subject(*args, **kwargs)  # type: ignore [reportCallIssue]

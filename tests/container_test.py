@@ -18,8 +18,8 @@ class ConstructurWithoutSelf:
 
 
 class ConstructorWithWeirdArgs:
-    def __init__(foo) -> None:  # noqa: N805
-        pass
+    def __init__(foo) -> None:  # noqa: N805 # type: ignore[reportSelfClsParameterName]
+        super().__init__()
 
 
 def test_container_reports_uninstantiable_types() -> None:
