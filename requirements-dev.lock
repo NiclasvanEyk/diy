@@ -67,6 +67,7 @@ pyright==1.1.358
 pytest==8.1.1
     # via pytest-cov
 pytest-cov==5.0.0
+pytest-watcher==0.4.2
 python-dateutil==2.9.0.post0
     # via ghp-import
 pyyaml==6.0.1
@@ -90,3 +91,4 @@ urllib3==2.2.1
     # via requests
 watchdog==4.0.0
     # via mkdocs
+    # via pytest-watcher
