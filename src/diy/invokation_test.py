@@ -3,18 +3,18 @@ import pytest
 from diy.invocation import PendingFunctionCall
 
 
-def add(a: int, b: int) -> int:
+def add(a: int, b: int) -> int:  # noqa: FURB118
     return a + b
 
 
 def test_it_can_detect_if_all_args_are_bound() -> None:
     pending = PendingFunctionCall(add)
     assert pending.can_be_called() == False
-    assert pending.missing() == set(["a", "b"])
+    assert pending.missing() == {"a", "b"}
 
     pending.bind({"a": 2})
     assert pending.can_be_called() == False
-    assert pending.missing() == set(["b"])
+    assert pending.missing() == {"b"}
 
     pending.bind({"b": 2})
     assert pending.can_be_called()

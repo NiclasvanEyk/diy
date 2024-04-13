@@ -42,9 +42,10 @@ class PendingFunctionCall[**P, R]:
 
             if not isinstance(value, expected_type):
                 received_type = type(value)
-                raise TypeError(
+                message = (
                     f"Parameter {name} expects {expected_type}, got {received_type}"
                 )
+                raise TypeError(message)
 
         self.parameters.update(parameters)
 
