@@ -37,27 +37,10 @@ And this is where specs come into play.
 
 ## Defining Specifications
 
-The simplest way to define a specification is using lambda functions.
+
 
 ```python
-spec = diy.Specification()
-
-spec.add(PasswordHasher, lambda: PasswordHasher(HashingAlgorithm.CRC32))
-```
-
-If a one-liner is not sufficient you can also pass a function by reference
-
-```python
-def build_hasher():
-  return PasswordHasher(HashingAlgorithm.CRC32)
-spec.add(PasswordHasher, build_hasher)
-```
-
-However this can look a bit awkward.
-In this case, you may prefer utilizing decorators:
-
-```python
-@spec.builder
+@spec.builders.decorate
 def build_hasher() -> PasswordHasher:
   return PasswordHasher(HashingAlgorithm.CRC32)
 ```
@@ -169,8 +152,14 @@ from app.cloud.aws import S3CloudStorageBucket  # This is a specialized CloudSto
 from app.cloud.digitalocean import DoSpacesBucket # Another one from a different cloud provider
 
 spec = diy.Specification()
-spec.add(ProfilePicturesBucket, lambda: S3CloudStorageBucket("arn:aws:s3:::profile-pictures"))
-spec.add(OpenGraphImagesBucket, lambda: OpenGraphImagesBucket("/images/og"))
+
+@spec.builders.decorate
+def build_profile_pictures_bucket() -> ProfilePicturesBucket:
+  return S3CloudStorageBucket("arn:aws:s3:::profile-pictures")
+
+@spec.builders.decorate
+def build_og_images_bucket() -> OpenGraphImagesBucket:
+  return DoSpacesBucket("/images/og")
 ```
 
 Now our container knows to assign the correct buckets to the correct services.

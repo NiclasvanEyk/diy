@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable
 from inspect import Parameter, Signature, signature
-from typing import Any, Self
+from typing import Any
 
 from diy.errors import (
     InvalidConstructorKeywordArgumentError,
@@ -22,30 +22,6 @@ class Builders:
     def __init__(self) -> None:
         super().__init__()
         self._by_type = {}
-
-    def add[T](self, abstract: type[T], builder: Callable[[], T]) -> Self:
-        """
-        Imperatively register a builder function for the abstract type.
-
-        >>> from diy import Specification
-        ...
-        >>> class Greeter:
-        ...   def __init__(self, name: str):
-        ...     self.name = name
-        ...
-        ...   def greet(self):
-        ...     print(f"Hello {self.name}!")
-        ...
-        >>> spec = Specification()
-        >>> _ = spec.builders.add(Greeter, lambda: Greeter("Ella"))
-        ...
-        >>> builder = spec.builders.get(Greeter)
-        >>> instance = builder()
-        >>> instance.greet()
-        Hello Ella!
-        """
-        self._by_type[qualified_name(abstract)] = builder
-        return self
 
     def decorate[T](self, builder: Callable[..., T]) -> Callable[..., T]:
         """
@@ -90,7 +66,9 @@ class Builders:
         ...     print(f"Hello {self.name}!")
         ...
         >>> spec = Specification()
-        >>> _ = spec.builders.add(Greeter, lambda: Greeter("Ella"))
+        >>> @spec.builders.decorate
+        ... def build_greeter() -> Greeter:
+        ...   return Greeter("Ella")
         ...
         >>> builder = spec.builders.get(Greeter)
         >>> instance = builder()
@@ -110,12 +88,15 @@ class Builders:
         >>> class C: pass
         ...
         >>> spec = Specification()
-        >>> _ = (
-        ...   spec.builders
-        ...   .add(A, lambda: A())
-        ...   .add(B, lambda: B())
-        ...   .add(C, lambda: C())
-        ... )
+        >>> @spec.builders.decorate
+        ... def build_a() -> A:
+        ...   return A()
+        >>> @spec.builders.decorate
+        ... def build_b() -> B:
+        ...   return B()
+        >>> @spec.builders.decorate
+        ... def build_c() -> C:
+        ...   return C()
         >>> assert spec.builders.known_types() == ["A", "B", "C"]
         """
         return list(self._by_type.keys())
@@ -134,42 +115,6 @@ class Partials:
     def __init__(self) -> None:
         super().__init__()
         self._by_type = defaultdict(dict)
-
-    def add[P](
-        self,
-        abstract: type[Any],
-        name: str,
-        parameter_type: type[P],
-        builder: Callable[..., P],
-    ) -> Self:
-        """
-        Add the given partial function for the given parameter of the given
-        abstract type.
-
-        >>> from diy import Specification
-        ...
-        >>> class Simple: pass
-        ...
-        >>> class Greeter:
-        ...   def __init__(self, name: str, simple: Simple):
-        ...     self.name = name
-        ...     self.simple = simple
-        ...
-        ...   def greet(self):
-        ...     print(f"Hello {self.name}!")
-        ...
-        >>> spec = Specification()
-        >>> _ = spec.partials.add(Greeter, "name", str, lambda: "Ella")
-        ...
-        >>> builder = spec.partials.get(Greeter, "name")
-        >>> instance = builder()
-        >>> print(builder())
-        Ella
-        """
-        parameter = assert_constructor_has_parameter(abstract, name)
-        assert_parameter_annotation_matches(abstract, parameter, parameter_type)
-        self._by_type[abstract][name] = builder
-        return self
 
     def decorate[P](self, abstract: type[Any], name: str) -> Callable[..., Any]:
         """

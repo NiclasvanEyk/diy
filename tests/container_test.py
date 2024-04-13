@@ -90,7 +90,10 @@ class ApiClient:
 
 def test_container_can_instantiate_kwargs_only_constructors() -> None:
     spec = Specification()
-    spec.builders.add(ApiClient, lambda: ApiClient("test"))
+
+    @spec.builders.decorate
+    def build_api_client() -> ApiClient:
+        return ApiClient("test")
 
     container = RuntimeContainer(spec)
     instance = container.resolve(ApiClient)
@@ -107,7 +110,10 @@ def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spe
     None
 ):
     spec = Specification()
-    spec.builders.add(ApiClient, lambda: ApiClient("test"))
+
+    @spec.builders.decorate
+    def build_api_client() -> ApiClient:
+        return ApiClient("test")
 
     container = RuntimeContainer(spec)
     instance = container.resolve(ImplicitlyResolvesApiClient)
@@ -138,7 +144,9 @@ def test_it_can_inject_itself_via_protocols() -> None:
     #       specific use-case, it is convenient. Though I guess it feelds more
     #       proper to support injecting builder arguments from the container
     #       instead.
-    spec.builders.add(Container, lambda: container)
+    @spec.builders.decorate
+    def inject_self() -> Container:
+        return container
 
     instance = container.resolve(Container)
     assert instance == container
@@ -160,7 +168,10 @@ def test_raises_exception_when_registering_partial_for_unannotated_parameter() -
 
 def test_it_can_resolve_when_all_args_have_registered_partials() -> None:
     spec = Specification()
-    spec.partials.add(Greeter, "name", str, lambda: "foo")
+
+    @spec.partials.decorate(Greeter, "name")
+    def build_greeter_name() -> str:
+        return "foo"
 
     container = RuntimeContainer(spec)
     greeter = container.resolve(Greeter)
@@ -173,34 +184,47 @@ def test_it_prefers_partial_builders_to_default_args() -> None:
             self.name = name
 
     spec = Specification()
-    spec.partials.add(DefaultGreeter, "name", str, lambda: "override")
-    container = RuntimeContainer(spec)
 
+    @spec.partials.decorate(DefaultGreeter, "name")
+    def build_default_greeter() -> str:
+        return "override"
+
+    container = RuntimeContainer(spec)
     greeter = container.resolve(DefaultGreeter)
 
     assert isinstance(greeter, DefaultGreeter)
     assert greeter.name == "override"
 
 
+class CloudBucket:
+    def __init__(self, path: str) -> None:
+        self.path = path
+
+
+ProfilePicturesBucket = Annotated[CloudBucket, "profile-pictures"]
+OpenGraphImagesBucket = Annotated[CloudBucket, "og-images"]
+
+
 def test_it_can_build_types_based_on_annotations() -> None:
-    class CloudBucket:
-        def __init__(self, path: string) -> None:
-            self.path = path
-
-    ProfilePicturesBucket = Annotated[CloudBucket, "profile-pictures"]
-    OpenGraphImagesBucket = Annotated[CloudBucket, "og-images"]
-
     class UserService:
         def __init__(self, bucket: ProfilePicturesBucket) -> None:
+            super().__init__()
             self.bucket = bucket
 
     class OgImageGenerator:
         def __init__(self, bucket: OpenGraphImagesBucket) -> None:
+            super().__init__()
             self.bucket = bucket
 
     spec = Specification()
-    spec.builders.add(ProfilePicturesBucket, lambda: CloudBucket("s3:profile_pictures"))
-    spec.builders.add(OgImageGenerator, lambda: CloudBucket("do:og-images"))
+
+    @spec.builders.decorate
+    def build_pfp_bucket() -> ProfilePicturesBucket:
+        return CloudBucket("s3:profile_pictures")
+
+    @spec.builders.decorate
+    def build_og_bucket() -> OpenGraphImagesBucket:
+        return CloudBucket("do:og-images")
 
     container = RuntimeContainer(spec)
 

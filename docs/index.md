@@ -30,7 +30,9 @@ class ApiClient:
 
 # We now teach our spec how to build an instance of this class, by reading the
 # token from an environment variable.
-spec.add(lambda: ApiClient(token=os.environ["API_TOKEN"]))
+@spec.builders.decorate
+def build_api_client() -> ApiClient:
+  return ApiClient(token=os.environ["API_TOKEN"])
 ```
 
 Once you are done specifying, you can construct a container based on the specification:
