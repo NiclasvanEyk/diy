@@ -1,13 +1,14 @@
 # Containers
 
-Containers are the 
+Containers apply the information contained in `Specification`s.
+This is mainly done in two ways: constructing instances of types and calling functions where your
 
 ## Types Of Containers
 
 ## Functionality
 
 The functionality of a container is quite simple on purpose.
-It mainly has two important 
+It mainly has two important
 
 ### Constructing Instances
 
