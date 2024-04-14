@@ -11,6 +11,12 @@ from diy.errors import (
     UnresolvableDependencyError,
     UnsupportedParameterTypeError,
 )
+from diy.resolution import (
+    ResolutionChain,
+    ResolutionChainEntry,
+    ResolutionChainNode,
+    ResolvedThrough,
+)
 from diy.specification import Specification
 
 
@@ -38,25 +44,42 @@ class RuntimeContainer(Container):
         self.spec = spec or Specification()
 
     @override
-    def resolve[T](self, abstract: type[T]) -> T:
+    def resolve[T](
+        self,
+        abstract: type[T],
+        chain_parent: ResolutionChainEntry | None = None,
+    ) -> T:
+        root_chain = False
+        if chain_parent is None:
+            root_chain = True
+            chain_parent = ResolutionChain(requestor=abstract)
+
         # Maybe we already know how to build this
         builder = self.spec.builders.get(abstract)
         if builder is not None:
+            chain_parent.resolved_through = ResolvedThrough.BUILDER
             return builder()
 
         # if not first check if it even can be built
         assert_is_instantiable(abstract)
 
         # if yes, try to resolve it based on the knowledge we have
-        [args, kwargs] = self.resolve_args(abstract.__init__, abstract)
+        [args, kwargs] = self.resolve_args(abstract.__init__, chain_parent)
+        if root_chain:
+            print(chain_parent)
         return abstract(*args, **kwargs)
 
     def resolve_args(
-        self, subject: Callable[..., Any], requestor: type[Any] | None = None
+        self,
+        subject: Callable[..., Any],
+        chain_parent: ResolutionChainEntry | None = None,
     ) -> tuple[list[Any], dict[str, Any]]:
         spec = signature(subject)
         args: list[Any] = []
         kwargs: dict[str, Any] = {}
+
+        if chain_parent is None:
+            chain_parent = ResolutionChain(requestor=subject)
 
         for name, parameter in spec.parameters.items():
             # TODO: This can definitely be done better
@@ -78,18 +101,30 @@ class RuntimeContainer(Container):
                 # TODO: Support other cases
                 raise UnsupportedParameterTypeError
 
-            if requestor is not None:
-                partial_builder = self.spec.partials.get(requestor, name)
-                if partial_builder is not None:
-                    kwargs[name] = partial_builder()
-                    continue
+            chain_entry = ResolutionChainNode(name, chain_parent.depth + 1)
+            chain_parent.children.append(chain_entry)
+
+            if isinstance(chain_parent, ResolutionChainNode):
+                parent_type = chain_parent.type
+                if isinstance(parent_type, type):
+                    partial_builder = self.spec.partials.get(parent_type, name)
+                    if partial_builder is not None:
+                        chain_entry.resolved_through = ResolvedThrough.PARTIAL
+                        kwargs[name] = partial_builder()
+                        continue
 
             if parameter.default is not Parameter.empty:
+                chain_entry.resolved_through = ResolvedThrough.DEFAULT
                 continue  # We will just use the default from python
 
             abstract = parameter.annotation
             if abstract is Parameter.empty:
                 raise MissingConstructorKeywordTypeAnnotationError(abstract, name)
+
+            if not isinstance(abstract, type):
+                print(f"!!!ANNOTATION ({abstract}) WAS NOT AN INSTANCE OF TYPE!!!")
+            else:
+                chain_entry.type = abstract
 
             # TODO: This can't happen right now, but it might be better dx if
             #       we throw a different error when ALL args of a constructor
@@ -97,14 +132,22 @@ class RuntimeContainer(Container):
             #       "resolver chain" in the error message, so users know WHY a
             #       type was resolved. That would also make this code path
             #       irrelevant.
+            # TODO: Somewhere we need to use the resolution chains to realize
+            #       the above. Maybe we need to use self.resolve here and
+            #       recurse instead of using the builders?
+            # TODO: Detect loops, maybe using the chain?
 
-            builder = self.spec.builders.get(abstract)
-            if builder is None:
-                raise UnresolvableDependencyError(
-                    abstract, self.spec.builders.known_types()
-                )
+            chain_entry.resolved_through = ResolvedThrough.INFERENCE
+            resolved = self.resolve(abstract, chain_parent)
+            kwargs[name] = resolved
 
-            kwargs[name] = builder()
+            # builder = self.spec.builders.get(abstract)
+            # if builder is None:
+            #     raise UnresolvableDependencyError(
+            #         abstract, self.spec.builders.known_types()
+            #     )
+            # kwargs[name] = builder()
+            # chain_entry.resolved_through = ResolvedThrough.BUILDER
 
         return (args, kwargs)
 

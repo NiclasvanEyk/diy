@@ -15,3 +15,7 @@ htmlcov
 
 # mkdocs
 /site
+
+# editors
+.vscode
+.idea
