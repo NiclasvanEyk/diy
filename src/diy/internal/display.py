@@ -3,9 +3,16 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Self
+from typing import Any
 
-from diy.resolution import ResolutionChain, ResolutionChainNode
+from diy.plan import (
+    BuilderBasedResolutionPlan,
+    BuilderParameterResolutionPlan,
+    DefaultParameterResolutionPlan,
+    ParameterPlanList,
+    ParameterResolutionPlan,
+    ResolutionPlan,
+)
 
 type FQN = tuple[str | None, str]
 
@@ -33,16 +40,15 @@ def qualified_name(abstract: str | type[Any] | Callable[..., Any]) -> str:
 
 
 @dataclass
-class ResoltionChainNodePrintUnit:
-    node: ResolutionChainNode
+class PlanDisplayContainer[T]:
+    node: ParameterResolutionPlan[T]
     is_last: bool
 
     @staticmethod
-    def map(nodes: list[ResolutionChainNode]) -> list[ResoltionChainNodePrintUnit]:
+    def map(nodes: ParameterPlanList) -> list[PlanDisplayContainer]:
         if len(nodes) == 0:
             return []
-
-        mapped = [ResoltionChainNodePrintUnit(node, False) for node in nodes]
+        mapped = [PlanDisplayContainer(node, False) for node in nodes]
         mapped[-1].is_last = True
         return mapped
 
@@ -53,16 +59,18 @@ def bold(subject: str, ansi: bool) -> str:
     return f"\033[1m{subject}\033[0m"
 
 
-def print_resolution_chain(chain: ResolutionChain, ansi: bool = True) -> str:
-    root_repr = (
-        f"{_print_qualified_name(chain.requestor, ansi)} [{chain.resolved_through}]"
-    )
+def print_resolution_plan(plan: ResolutionPlan, ansi: bool = True) -> str:
+    root_repr = f"{_print_qualified_name(plan.type, ansi)}"
+    if isinstance(plan, BuilderBasedResolutionPlan):
+        root_repr += " [!]"
+
+    # If we resolve the whole plan through a single builder, we are done here
+    if isinstance(plan, BuilderBasedResolutionPlan):
+        return root_repr
 
     children_repr = ""
 
-    tree: deque[ResoltionChainNodePrintUnit] = deque(
-        ResoltionChainNodePrintUnit.map(chain.children)
-    )
+    tree: deque[PlanDisplayContainer] = deque(PlanDisplayContainer.map(plan.parameters))
     while len(tree) > 0:
         unit = tree.popleft()
         child = unit.node
@@ -70,10 +78,16 @@ def print_resolution_chain(chain: ResolutionChain, ansi: bool = True) -> str:
         param_repr = _display_param(child.name, child.type, ansi)
         child_repr = "│  " * child.depth
         child_repr += f"{"└" if unit.is_last else "├"}─"
-        child_repr += f" {param_repr} [{child.resolved_through}]"
+        child_repr += f" {param_repr}"
+        if isinstance(child, BuilderParameterResolutionPlan):
+            child_repr += " [!]"
         children_repr += f"\n{child_repr}"
 
-        for unit in reversed(ResoltionChainNodePrintUnit.map(child.children)):
+        if isinstance(child, DefaultParameterResolutionPlan):
+            continue
+        if isinstance(child, BuilderParameterResolutionPlan):
+            continue
+        for unit in reversed(PlanDisplayContainer.map(child.parameters)):
             tree.appendleft(unit)
 
     return f"{root_repr}{children_repr}"

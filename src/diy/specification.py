@@ -3,13 +3,15 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable
 from inspect import Parameter, Signature, signature
-from typing import Any
+from typing import Annotated, Any, get_origin
 
 from diy.errors import (
     InvalidConstructorKeywordArgumentError,
     MissingConstructorKeywordArgumentError,
     MissingReturnTypeAnnotationError,
 )
+from diy.internal.validation import assert_is_typelike
+from diy.internal.validation import assert_is_typelike
 from diy.internal.display import qualified_name
 
 
@@ -17,7 +19,7 @@ class Builders:
     """
     Add and retrieve builder functions for types."""
 
-    _by_type: dict[str, Callable[..., Any]]
+    _by_type: dict[type[Any], Callable[..., Any]]
 
     def __init__(self) -> None:
         super().__init__()
@@ -49,7 +51,7 @@ class Builders:
         Hello Ella!
         """
         abstract = assert_annotates_return_type(builder)
-        self._by_type[qualified_name(abstract)] = builder
+        self._by_type[abstract] = builder
         return builder
 
     def get[T](self, abstract: type[T]) -> Callable[[], T] | None:
@@ -75,9 +77,9 @@ class Builders:
         >>> instance.greet()
         Hello Ella!
         """
-        return self._by_type.get(qualified_name(abstract))
+        return self._by_type.get(abstract)
 
-    def known_types(self) -> list[str]:
+    def known_types(self) -> list[type[Any]]:
         """
         Returns a list of all types known to the spec.
 
@@ -184,7 +186,7 @@ class Specification:
 
 
 def assert_constructor_has_parameter(abstract: type[Any], name: str) -> Parameter:
-    sig = signature(abstract.__init__)
+    sig = signature(abstract.__init__, eval_str=True)
     parameter = sig.parameters.get(name)
     if parameter is None:
         raise MissingConstructorKeywordArgumentError(abstract, name)
@@ -192,7 +194,7 @@ def assert_constructor_has_parameter(abstract: type[Any], name: str) -> Paramete
 
 
 def assert_parameter_annotation_matches(
-    abstract: type[Any], parameter: Parameter, builder_returns: type[Any] | str
+    abstract: type[Any], parameter: Parameter, builder_returns: type[Any]
 ) -> None:
     accepts = parameter.annotation
     if accepts is Parameter.empty:
@@ -206,8 +208,11 @@ def assert_parameter_annotation_matches(
         )
 
 
-def assert_annotates_return_type[R](builder: Callable[..., R]) -> type[R] | str:
-    abstract = signature(builder).return_annotation
+def assert_annotates_return_type[R](builder: Callable[..., R]) -> type[R]:
+    abstract = signature(builder, eval_str=True).return_annotation
     if abstract is Signature.empty:
         raise MissingReturnTypeAnnotationError
+
+    assert_is_typelike(abstract)
+
     return abstract

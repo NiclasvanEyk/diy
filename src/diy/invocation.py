@@ -23,7 +23,7 @@ class PendingFunctionCall[**P, R]:
     ) -> None:
         super().__init__()
         self.subject = subject
-        self.signature = signature(subject)
+        self.signature = signature(subject, eval_str=True)
         self.parameters = parameters if parameters is not None else {}
 
     def bind(self, parameters: dict[str, Any]) -> None:

@@ -19,3 +19,7 @@ htmlcov
 # editors
 .vscode
 .idea
+
+# tooling
+.ruff_cache
+.pytest_cache
