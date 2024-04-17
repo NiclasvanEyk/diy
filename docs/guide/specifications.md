@@ -173,3 +173,8 @@ Now our container knows to assign the correct buckets to the correct services.
 TODO: When `UserService` needs `EmailNotifier` -> use global_bcc = "customer-support@niclasve.me"
       When `ImportService` needs `EmailNotifier` -> use global_bcc = "data-engineering@niclasve.me"
 
+## Eager And Lazy Specifications
+
+DB Session -> short lived
+Current Request -> short lived
+PasswordHasher -> long lived, static
