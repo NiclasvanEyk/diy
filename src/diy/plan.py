@@ -129,7 +129,7 @@ class InferenceBasedResolutionPlan[T]:
 
 @dataclass
 class BuilderBasedResolutionPlan[T]:
-    subject: type[T]
+    type: type[T]
     """
     What is trying to be resolved. Either a type or a function that we resolve
     the arguments for.

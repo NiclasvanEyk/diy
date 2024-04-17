@@ -6,9 +6,9 @@ import pytest
 
 from diy import Container, RuntimeContainer, Specification
 from diy.errors import (
+    FailedToInferDependencyError,
     MissingConstructorKeywordTypeAnnotationError,
     UninstanciableTypeError,
-    UnresolvableDependencyError,
 )
 
 
@@ -130,7 +130,7 @@ def test_it_throws_when_type_cannot_be_resolved() -> None:
     spec = Specification()
     container = RuntimeContainer(spec)
 
-    with pytest.raises(UnresolvableDependencyError):
+    with pytest.raises(FailedToInferDependencyError):
         container.resolve(Greeter)
 
 

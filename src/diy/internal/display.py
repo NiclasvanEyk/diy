@@ -8,6 +8,7 @@ from typing import Any
 from diy.plan import (
     BuilderBasedResolutionPlan,
     BuilderParameterResolutionPlan,
+    CallableResolutionPlan,
     DefaultParameterResolutionPlan,
     ParameterPlanList,
     ParameterResolutionPlan,
@@ -60,7 +61,11 @@ def bold(subject: str, ansi: bool) -> str:
 
 
 def print_resolution_plan(plan: ResolutionPlan, ansi: bool = True) -> str:
-    root_repr = f"{_print_qualified_name(plan.type, ansi)}"
+    root_repr = ""
+    if isinstance(plan, CallableResolutionPlan):
+        root_repr = f"{plan.subject}"
+    else:
+        root_repr = f"{_print_qualified_name(plan.type, ansi)}"
     if isinstance(plan, BuilderBasedResolutionPlan):
         root_repr += " [!]"
 

@@ -3,12 +3,12 @@ from inspect import Parameter, getfullargspec, signature
 from typing import Any
 
 from diy.errors import (
+    FailedToInferDependencyError,
     MissingConstructorKeywordTypeAnnotationError,
     UninstanciableTypeError,
     UnsupportedParameterTypeError,
 )
-from diy.internal.validation import assert_is_typelike
-from diy.internal.validation import assert_is_typelike
+from diy.internal.validation import assert_is_typelike, is_typelike
 from diy.plan import (
     BuilderBasedResolutionPlan,
     BuilderParameterResolutionPlan,
@@ -27,6 +27,7 @@ class Planner:
     """
 
     def __init__(self, spec: Specification) -> None:
+        super().__init__()
         self.spec = spec
 
     def plan[T](
@@ -44,7 +45,7 @@ class Planner:
 
         # if not, try to resolve it based on the knowledge we have
         plan = InferenceBasedResolutionPlan(subject)
-        self._fill_plan_based_on_inference(subject.__init__, plan)
+        self._fill_plan_based_on_inference(subject.__init__, plan, plan)
         return plan
 
     def _fill_plan_based_on_inference[**P, T](
@@ -53,12 +54,19 @@ class Planner:
         parent: InferenceParameterResolutionPlan[T]
         | InferenceBasedResolutionPlan[T]
         | CallableResolutionPlan[P, T],
+        root: InferenceBasedResolutionPlan[Any] | CallableResolutionPlan[P, T],
     ) -> None:
         depth = -1
         if isinstance(parent, InferenceParameterResolutionPlan):
             depth = parent.depth
 
-        for name, parameter in signature(subject, eval_str=True).parameters.items():
+        try:
+            sig = signature(subject, eval_str=True)
+        except ValueError as exception:
+            assert isinstance(parent, InferenceParameterResolutionPlan)
+            raise FailedToInferDependencyError(root, parent) from exception  # type: ignore[reportArgumentType]
+
+        for name, parameter in sig.parameters.items():
             # TODO: This can definitely be done better
             if name == "self" or name[0:1] == "*" or name[0:2] == "**":
                 continue
@@ -78,8 +86,6 @@ class Planner:
                 # TODO: Support other cases
                 raise UnsupportedParameterTypeError
 
-            print(parameter)
-
             # If a specific type requests a parameter, we can ask if we have a
             # partial builder for it. Since this is the most specific
             # instruction, we check it first.
@@ -92,7 +98,7 @@ class Planner:
                 parent, InferenceParameterResolutionPlan | InferenceBasedResolutionPlan
             ):
                 parent_type = parent.type
-                if isinstance(parent_type, type):
+                if is_typelike(parent_type):
                     partial_builder = self.spec.partials.get(parent_type, name)
                     if partial_builder is not None:
                         parent.parameters.append(
@@ -105,7 +111,7 @@ class Planner:
                         )
                         continue
             else:
-                print(parent)
+                pass
 
             # If the parameter has a default, it is preferrable
             if parameter.default is not Parameter.empty:
@@ -146,10 +152,9 @@ class Planner:
             # TODO: Detect loops, maybe using the plan?
             plan = InferenceParameterResolutionPlan(name, depth + 1, abstract)
             parent.parameters.append(plan)
-            print(f"inferring '{abstract}' for parameter {name}...")
-            self._fill_plan_based_on_inference(abstract, plan)
+            self._fill_plan_based_on_inference(abstract, plan, root)
 
-    def _get_requestor(self, parent: Any) -> type[Any] | None:
+    def _get_requestor(self, parent: object) -> type[Any] | None:
         """
         Plans the resolution of an parameters for a function.
         """
@@ -164,7 +169,7 @@ class Planner:
         self, subject: Callable[P, R]
     ) -> CallableResolutionPlan[P, R]:
         plan = CallableResolutionPlan(subject)
-        self._fill_plan_based_on_inference(subject, plan)
+        self._fill_plan_based_on_inference(subject, plan, plan)
         return plan
 
 

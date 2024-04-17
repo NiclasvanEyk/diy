@@ -3,16 +3,15 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable
 from inspect import Parameter, Signature, signature
-from typing import Annotated, Any, get_origin
+from typing import Any
 
 from diy.errors import (
     InvalidConstructorKeywordArgumentError,
     MissingConstructorKeywordArgumentError,
     MissingReturnTypeAnnotationError,
 )
-from diy.internal.validation import assert_is_typelike
-from diy.internal.validation import assert_is_typelike
 from diy.internal.display import qualified_name
+from diy.internal.validation import assert_is_typelike
 
 
 class Builders:
@@ -99,7 +98,8 @@ class Builders:
         >>> @spec.builders.decorate
         ... def build_c() -> C:
         ...   return C()
-        >>> assert spec.builders.known_types() == ["A", "B", "C"]
+        >>> spec.builders.known_types()
+        [<class 'diy.specification.A'>, <class 'diy.specification.B'>, <class 'diy.specification.C'>]
         """
         return list(self._by_type.keys())
 

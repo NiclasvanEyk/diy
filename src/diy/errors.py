@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from diy.internal.display import qualified_name
+from diy.internal.display import print_resolution_plan, qualified_name
+from diy.plan import (
+    CallableResolutionPlan,
+    InferenceBasedResolutionPlan,
+    InferenceParameterResolutionPlan,
+)
 
 
 class DiyError(Exception):
@@ -20,6 +25,23 @@ class UninstanciableTypeError(DiyError):
 
 class UnsupportedParameterTypeError(DiyError):
     pass
+
+
+class FailedToInferDependencyError(DiyError):
+    def __init__(
+        self,
+        plan: InferenceBasedResolutionPlan[Any] | CallableResolutionPlan[..., Any],
+        parent: InferenceParameterResolutionPlan[Any],
+    ) -> None:
+        # TODO: We actually need parent.parent.type here. But that is not available (yet)
+        message = (
+            f"Failed to infer parameter {parent.name} for {qualified_name(parent.type)}"
+        )
+        super().__init__(message)
+        printed_plan = print_resolution_plan(plan)
+        # TODO: The plan is somewhat helpful here, but we should hint to the
+        #       developer at which point of the plan this exception originates
+        self.add_note(f"\n{printed_plan}")
 
 
 class UnresolvableDependencyError(DiyError):
