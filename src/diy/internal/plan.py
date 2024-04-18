@@ -163,8 +163,10 @@ class CallableResolutionPlan[**P, T]:
         return self.subject(*args, **kwargs)  # type: ignore
 
 
-type ResolutionPlan = (
-    CallableResolutionPlan | BuilderBasedResolutionPlan | InferenceBasedResolutionPlan
+type ResolutionPlan[**P, T] = (
+    CallableResolutionPlan[P, T]
+    | BuilderBasedResolutionPlan[P, T]
+    | InferenceBasedResolutionPlan[T]
 )
 
 

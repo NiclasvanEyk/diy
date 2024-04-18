@@ -75,31 +75,6 @@ class Builders:
         """
         return self._by_type.get(abstract)
 
-    def known_types(self) -> list[type[Any]]:
-        """
-        Returns a list of all types known to the spec.
-
-        >>> from diy import Specification
-        ...
-        >>> class A: pass
-        >>> class B: pass
-        >>> class C: pass
-        ...
-        >>> spec = Specification()
-        >>> @spec.builders.decorate
-        ... def build_a() -> A:
-        ...   return A()
-        >>> @spec.builders.decorate
-        ... def build_b() -> B:
-        ...   return B()
-        >>> @spec.builders.decorate
-        ... def build_c() -> C:
-        ...   return C()
-        >>> spec.builders.known_types()
-        [<class 'diy.specification.A'>, <class 'diy.specification.B'>, <class 'diy.specification.C'>]
-        """
-        return list(self._by_type.keys())
-
 
 class Partials:
     """
@@ -180,3 +155,8 @@ class Specification:
         super().__init__()
         self.builders = Builders()
         self.partials = Partials()
+
+    def types(self) -> set[type[Any]]:
+        types = set(self.builders._by_type.keys())
+        types.update(self.partials._by_type.keys())
+        return types
