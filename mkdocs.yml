@@ -39,6 +39,28 @@ nav:
       - API Docs: "reference/api-docs.md"
       - Changelog: "reference/changelog.md"
 
+plugins:
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            extensions:
+              - griffe_inherited_docstrings
+            show_bases: false
+            show_source: false
+            show_root_heading: true
+            show_if_no_docstring: true
+            show_signature_annotations: true
+            inherited_members: true
+            members_order: source
+            separate_signature: true
+            unwrap_annotated: true
+            filters: ["!^_", "!internal"]
+            merge_init_into_class: true
+            signature_crossrefs: true
+            show_symbol_type_heading: true
+
 markdown_extensions:
   # Callouts / Alerts
   - admonition
