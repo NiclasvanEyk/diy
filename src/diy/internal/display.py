@@ -41,12 +41,12 @@ def qualified_name(abstract: str | type[Any] | Callable[..., Any]) -> str:
 
 
 @dataclass
-class PlanDisplayContainer[T]:
-    node: ParameterResolutionPlan[T]
+class PlanDisplayContainer[**P, T]:
+    node: ParameterResolutionPlan[P, T]
     is_last: bool
 
     @staticmethod
-    def map(nodes: ParameterPlanList) -> list[PlanDisplayContainer]:
+    def map(nodes: ParameterPlanList) -> list[PlanDisplayContainer[..., Any]]:
         if len(nodes) == 0:
             return []
         mapped = [PlanDisplayContainer(node, False) for node in nodes]

@@ -50,7 +50,7 @@ class Builders:
         self._by_type[abstract] = builder
         return builder
 
-    def get[T](self, abstract: type[T]) -> Callable[[], T] | None:
+    def get[T](self, abstract: type[T]) -> Callable[..., T] | None:
         """
         Retrieve a builder function for the given abstract type.
 

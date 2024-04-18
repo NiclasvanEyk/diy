@@ -30,9 +30,9 @@ class Planner:
         super().__init__()
         self.spec = spec
 
-    def plan[T](
+    def plan[**P, T](
         self, subject: type[T]
-    ) -> BuilderBasedResolutionPlan[T] | InferenceBasedResolutionPlan[T]:
+    ) -> BuilderBasedResolutionPlan[P, T] | InferenceBasedResolutionPlan[T]:
         """
         Plans the resolution of an instance of the type.
         """
@@ -41,7 +41,8 @@ class Planner:
         # maybe we already know how to build this
         builder = self.spec.builders.get(subject)
         if builder is not None:
-            return BuilderBasedResolutionPlan(subject, builder)
+            args_plan = self.plan_call(builder)
+            return BuilderBasedResolutionPlan(subject, builder, args_plan)
 
         # if not, try to resolve it based on the knowledge we have
         plan = InferenceBasedResolutionPlan(subject)
@@ -101,12 +102,14 @@ class Planner:
                 if is_typelike(parent_type):
                     partial_builder = self.spec.partials.get(parent_type, name)
                     if partial_builder is not None:
+                        args_plan = self.plan_call(partial_builder)
                         parent.parameters.append(
                             BuilderParameterResolutionPlan(
                                 name,
                                 depth + 1,
                                 type=parent_type,
                                 builder=partial_builder,
+                                args_plan=args_plan,
                             )
                         )
                         continue
@@ -138,9 +141,10 @@ class Planner:
             # If the user told us to resolve this type in a specific way, use it
             builder = self.spec.builders.get(abstract)
             if builder is not None:
+                args_plan = self.plan_call(builder)
                 parent.parameters.append(
                     BuilderParameterResolutionPlan(
-                        parameter.name, depth + 1, subject, builder
+                        parameter.name, depth + 1, subject, builder, args_plan
                     )
                 )
                 continue

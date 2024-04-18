@@ -86,7 +86,7 @@ def test_container_actually_resolves_the_default_arguments() -> None:
 class ApiClient:
     def __init__(self, token: str) -> None:
         super().__init__()
-        self.token = token
+        self.base = token
 
 
 def test_container_can_instantiate_kwargs_only_constructors() -> None:
@@ -234,3 +234,40 @@ def test_it_can_build_types_based_on_annotations() -> None:
 
     generator = container.resolve(OgImageGenerator)
     assert generator.bucket.path == "do:og-images"
+
+
+class ConfigStore:
+    def get(self, key: str) -> str:
+        return "test"
+
+
+def test_it_supplies_builders_with_args_from_the_container() -> None:
+    spec = Specification()
+
+    @spec.builders.decorate
+    def build_api_client(config: ConfigStore) -> ApiClient:
+        return ApiClient(config.get("token"))
+
+    container = RuntimeContainer(spec)
+    instance = container.resolve(ApiClient)
+
+    assert instance.base == "test"
+
+
+class ConsumesApiClient:
+    def __init__(self, api: ApiClient) -> None:
+        super().__init__()
+        self.api = api
+
+
+def test_it_supplies_nested_builders_with_args_from_the_container() -> None:
+    spec = Specification()
+
+    @spec.builders.decorate
+    def build_api_client(config: ConfigStore) -> ApiClient:
+        return ApiClient(config.get("api_base"))
+
+    container = RuntimeContainer(spec)
+    instance = container.resolve(ConsumesApiClient)
+
+    assert instance.api.base == "test"

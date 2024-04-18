@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-type ParameterPlanList = list[ParameterResolutionPlan[Any]]
+type ParameterPlanList = list[ParameterResolutionPlan[..., Any]]
 
 
 @dataclass
@@ -27,17 +27,20 @@ class DefaultParameterResolutionPlan[T](ParameterResolutionPlanBase[T]):
 
 
 @dataclass
-class BuilderParameterResolutionPlan[T](ParameterResolutionPlanBase[T]):
+class BuilderParameterResolutionPlan[**P, T](ParameterResolutionPlanBase[T]):
     """
     A parameter that is resolved by calling its builder.
     """
 
-    # TODO: If the builder gets its arguments resolved, we need to continue
-    #       resolving them. But for now this might be to complex.
-    builder: Callable[..., T]
+    builder: Callable[P, T]
+    """The function that knows how to build the type."""
+
+    args_plan: CallableResolutionPlan[P, T]
+    """A plan for calling the function that knows how to build the type."""
 
     def execute(self) -> T:
-        return self.builder()
+        """Actually build the type"""
+        return self.args_plan.execute()
 
 
 @dataclass
@@ -70,8 +73,8 @@ class InferenceParameterResolutionPlan[T](ParameterResolutionPlanBase[T]):
         return self.type(*args, **kwargs)
 
 
-type ParameterResolutionPlan[T] = (
-    BuilderParameterResolutionPlan[T]
+type ParameterResolutionPlan[**P, T] = (
+    BuilderParameterResolutionPlan[P, T]
     | InferenceParameterResolutionPlan[T]
     | DefaultParameterResolutionPlan[T]
 )
@@ -128,7 +131,7 @@ class InferenceBasedResolutionPlan[T]:
 
 
 @dataclass
-class BuilderBasedResolutionPlan[T]:
+class BuilderBasedResolutionPlan[**P, T]:
     type: type[T]
     """
     What is trying to be resolved. Either a type or a function that we resolve
@@ -137,10 +140,12 @@ class BuilderBasedResolutionPlan[T]:
 
     # TODO: If the builder gets its arguments resolved, we need to continue
     #       resolving them. But for now this might be to complex.
-    builder: Callable[..., T]
+    builder: Callable[P, T]
+
+    args_plan: CallableResolutionPlan[P, T]
 
     def execute(self) -> T:
-        return self.builder()
+        return self.args_plan.execute()
 
 
 @dataclass
