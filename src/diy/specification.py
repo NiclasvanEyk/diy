@@ -2,16 +2,13 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable
-from inspect import Parameter, Signature, signature
 from typing import Any
 
-from diy.errors import (
-    InvalidConstructorKeywordArgumentError,
-    MissingConstructorKeywordArgumentError,
-    MissingReturnTypeAnnotationError,
+from diy.internal.validation import (
+    assert_annotates_return_type,
+    assert_constructor_has_parameter,
+    assert_parameter_annotation_matches,
 )
-from diy.internal.display import qualified_name
-from diy.internal.validation import assert_is_typelike
 
 
 class Builders:
@@ -183,36 +180,3 @@ class Specification:
         super().__init__()
         self.builders = Builders()
         self.partials = Partials()
-
-
-def assert_constructor_has_parameter(abstract: type[Any], name: str) -> Parameter:
-    sig = signature(abstract.__init__, eval_str=True)
-    parameter = sig.parameters.get(name)
-    if parameter is None:
-        raise MissingConstructorKeywordArgumentError(abstract, name)
-    return parameter
-
-
-def assert_parameter_annotation_matches(
-    abstract: type[Any], parameter: Parameter, builder_returns: type[Any]
-) -> None:
-    accepts = parameter.annotation
-    if accepts is Parameter.empty:
-        # TODO: We could add a strict mode here and throw, if the
-        return
-
-    # TODO: We need to check assignability here! Maybe defer to a third-party library?
-    if qualified_name(accepts) != qualified_name(builder_returns):
-        raise InvalidConstructorKeywordArgumentError(
-            abstract, parameter.name, builder_returns, accepts
-        )
-
-
-def assert_annotates_return_type[R](builder: Callable[..., R]) -> type[R]:
-    abstract = signature(builder, eval_str=True).return_annotation
-    if abstract is Signature.empty:
-        raise MissingReturnTypeAnnotationError
-
-    assert_is_typelike(abstract)
-
-    return abstract

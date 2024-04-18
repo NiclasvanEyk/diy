@@ -5,7 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from diy.plan import (
+from diy.internal.plan import (
     BuilderBasedResolutionPlan,
     BuilderParameterResolutionPlan,
     CallableResolutionPlan,

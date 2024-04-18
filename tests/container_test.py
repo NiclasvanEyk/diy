@@ -4,7 +4,8 @@ from typing import Annotated, Any
 
 import pytest
 
-from diy import Container, RuntimeContainer, Specification
+from diy import RuntimeContainer, Specification
+from diy.container import Container
 from diy.errors import (
     FailedToInferDependencyError,
     MissingConstructorKeywordTypeAnnotationError,

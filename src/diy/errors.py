@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from diy.internal.display import print_resolution_plan, qualified_name
-from diy.plan import (
+from diy.internal.plan import (
     CallableResolutionPlan,
     InferenceBasedResolutionPlan,
     InferenceParameterResolutionPlan,

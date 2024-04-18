@@ -9,7 +9,7 @@ from diy.errors import (
     UnsupportedParameterTypeError,
 )
 from diy.internal.validation import assert_is_typelike, is_typelike
-from diy.plan import (
+from diy.internal.plan import (
     BuilderBasedResolutionPlan,
     BuilderParameterResolutionPlan,
     CallableResolutionPlan,

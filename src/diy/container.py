@@ -5,7 +5,7 @@ from collections.abc import Callable
 from typing import Protocol, override
 
 from diy.internal.planner import Planner
-from diy.specification import Specification
+from diy.specification import Builders, Partials, Specification
 
 
 class Container(Protocol):
@@ -30,7 +30,8 @@ class RuntimeContainer(Container):
 
     def __init__(self, spec: Specification | None = None) -> None:
         super().__init__()
-        self._planner = Planner(spec or Specification())
+        self._spec = spec or Specification()
+        self._planner = Planner(self._spec)
 
     @override
     def resolve[T](self, abstract: type[T]) -> T:
@@ -41,3 +42,13 @@ class RuntimeContainer(Container):
     def call[R](self, function: Callable[..., R]) -> R:
         plan = self._planner.plan_call(function)
         return plan.execute()
+
+
+class SpecContainer(RuntimeContainer):
+    @property
+    def builders(self) -> Builders:
+        return self._spec.builders
+
+    @property
+    def partials(self) -> Partials:
+        return self._spec.partials

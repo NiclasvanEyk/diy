@@ -14,7 +14,7 @@ requires-python = ">= 3.12"
 
 [project.urls]
 Homepage = "https://github.com/NiclasvanEyk/diy"
-Documentation = "https://github.com/NiclasvanEyk/diy"
+Documentation = "https://diy.niclasve.me"
 Repository = "https://github.com/NiclasvanEyk/diy.git"
 Issues = "https://github.com/NiclasvanEyk/diy/issues"
 Changelog = "https://github.com/NiclasvanEyk/diy/blob/main/CHANGELOG.md"
