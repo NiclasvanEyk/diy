@@ -8,7 +8,6 @@ from diy.errors import (
     UninstanciableTypeError,
     UnsupportedParameterTypeError,
 )
-from diy.internal.validation import assert_is_typelike, is_typelike
 from diy.internal.plan import (
     BuilderBasedResolutionPlan,
     BuilderParameterResolutionPlan,
@@ -17,6 +16,7 @@ from diy.internal.plan import (
     InferenceBasedResolutionPlan,
     InferenceParameterResolutionPlan,
 )
+from diy.internal.validation import assert_is_typelike, is_typelike
 from diy.specification import Specification
 
 
