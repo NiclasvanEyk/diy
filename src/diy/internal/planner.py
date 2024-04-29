@@ -108,6 +108,7 @@ class Planner:
                                 name,
                                 depth + 1,
                                 type=parent_type,
+                                parent=parent,
                                 builder=partial_builder,
                                 args_plan=args_plan,
                             )
@@ -120,7 +121,10 @@ class Planner:
             if parameter.default is not Parameter.empty:
                 parent.parameters.append(
                     DefaultParameterResolutionPlan(
-                        name, depth + 1, type(parameter.default)
+                        name=name,
+                        depth=depth + 1,
+                        type=type(parameter.default),
+                        parent=parent,
                     )
                 )
                 continue
@@ -144,7 +148,12 @@ class Planner:
                 args_plan = self.plan_call(builder)
                 parent.parameters.append(
                     BuilderParameterResolutionPlan(
-                        parameter.name, depth + 1, subject, builder, args_plan
+                        name=parameter.name,
+                        depth=depth + 1,
+                        type=abstract,
+                        parent=parent,
+                        builder=builder,
+                        args_plan=args_plan,
                     )
                 )
                 continue
@@ -154,7 +163,12 @@ class Planner:
             # potentially multiple levels deep.
             #
             # TODO: Detect loops, maybe using the plan?
-            plan = InferenceParameterResolutionPlan(name, depth + 1, abstract)
+            plan = InferenceParameterResolutionPlan(
+                name=name,
+                depth=depth + 1,
+                type=abstract,
+                parent=parent,
+            )
             parent.parameters.append(plan)
             self._fill_plan_based_on_inference(abstract, plan, root)
 

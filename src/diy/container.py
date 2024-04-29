@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import Protocol, override
+from typing import Protocol, override, runtime_checkable
 
 from diy.internal.planner import Planner
 from diy.internal.verification import verify_specification
 from diy.specification import Specification
 
 
+@runtime_checkable
 class Container(Protocol):
     """
     The protocol all containers in this package adhere to.
@@ -29,7 +30,6 @@ class Container(Protocol):
         one, or even fail, since the container does not know the type or does
         not have enough information how to build it.
         """
-        pass  # pragma: no cover
 
     @abstractmethod
     def call[R](self, function: Callable[..., R]) -> R:
@@ -37,7 +37,6 @@ class Container(Protocol):
         Calls the given function after resolving all required parameters from
         the container.
         """
-        pass  # pragma: no cover
 
 
 class RuntimeContainer(Container):

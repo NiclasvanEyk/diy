@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from diy.internal.display import print_resolution_plan, qualified_name
@@ -38,10 +39,20 @@ class FailedToInferDependencyError(DiyError):
             f"Failed to infer parameter {parent.name} for {qualified_name(parent.type)}"
         )
         super().__init__(message)
+        self.parent = parent
+        self.plan = plan
         printed_plan = print_resolution_plan(plan)
         # TODO: The plan is somewhat helpful here, but we should hint to the
         #       developer at which point of the plan this exception originates
         self.add_note(f"\n{printed_plan}")
+
+    @property
+    def subject(self) -> type[Any] | Callable[..., Any]:
+        grandparent = self.parent.parent
+        if isinstance(grandparent, CallableResolutionPlan):
+            return grandparent.subject
+
+        return grandparent.type
 
 
 class UnresolvableDependencyError(DiyError):

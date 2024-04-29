@@ -18,6 +18,9 @@ class ParameterResolutionPlanBase[T]:
     type: type[T]
     """The type of the parameter."""
 
+    parent: ResolutionPlan[..., Any] | ParameterResolutionPlan[..., Any]
+    """The parent plan that requested this one."""
+
 
 @dataclass
 class DefaultParameterResolutionPlan[T](ParameterResolutionPlanBase[T]):

@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
+from sys import stdout
 from typing import Any
 
 from diy.internal.plan import (
@@ -60,7 +61,10 @@ def bold(subject: str, ansi: bool) -> str:
     return f"\033[1m{subject}\033[0m"
 
 
-def print_resolution_plan(plan: ResolutionPlan, ansi: bool = True) -> str:
+def print_resolution_plan(plan: ResolutionPlan, ansi: bool | None = None) -> str:
+    if ansi is None:
+        ansi = stdout.isatty()
+
     root_repr = ""
     if isinstance(plan, CallableResolutionPlan):
         root_repr = f"{plan.subject}"

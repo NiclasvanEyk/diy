@@ -151,12 +151,23 @@ class Specification:
     partials: Partials
     """Add and retrieve builder functions for constructor paramters of types."""
 
+    _explicitly_registered_types: set[type[Any]]
+    """
+    Types that are part of the application, but do not require any explicit
+    instructions for how they should be built.
+    """
+
     def __init__(self) -> None:
         super().__init__()
         self.builders = Builders()
         self.partials = Partials()
+        self._explicitly_registered_types = set()
+
+    def add(self, abstract: type[Any]) -> None:
+        self._explicitly_registered_types.add(abstract)
 
     def types(self) -> set[type[Any]]:
         types = set(self.builders._by_type.keys())
         types.update(self.partials._by_type.keys())
+        types.update(self._explicitly_registered_types)
         return types
