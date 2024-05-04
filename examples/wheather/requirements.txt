@@ -1,0 +1,6 @@
+-e ../..
+-e .
+httpx
+fastapi
+click
+numpy
