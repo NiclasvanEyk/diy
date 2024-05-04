@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from inspect import Parameter, Signature, signature
+from types import UnionType
 from typing import Annotated, Any, get_origin
 
 from diy.errors import (
@@ -7,11 +8,13 @@ from diy.errors import (
     MissingConstructorKeywordArgumentError,
     MissingReturnTypeAnnotationError,
 )
-from diy.internal.display import qualified_name
 
 
 def is_typelike(subject: object) -> bool:
     if isinstance(subject, type):
+        return True
+
+    if isinstance(subject, UnionType):
         return True
 
     return get_origin(subject) is Annotated
@@ -41,8 +44,25 @@ def assert_parameter_annotation_matches(
         # TODO: We could add a strict mode here and throw, if the
         return
 
-    # TODO: We need to check assignability here! Maybe defer to a third-party library?
-    if qualified_name(accepts) != qualified_name(builder_returns):
+    # For unions we check if the builder returns a proper subset of the
+    # parameter types. That is, all types returned from the builder must also
+    # be accepted by the parameter.
+    if isinstance(accepts, UnionType):
+        accepted_members = set(accepts.__args__)
+        returned: set[type] = (
+            set(builder_returns.__args__)
+            if isinstance(builder_returns, UnionType)
+            else {builder_returns}
+        )
+        not_accepted = returned.difference(accepted_members)
+
+        if len(not_accepted) > 0:
+            raise InvalidConstructorKeywordArgumentError(
+                abstract, parameter.name, builder_returns, accepts
+            )
+        return
+
+    if not isinstance(builder_returns, accepts):
         raise InvalidConstructorKeywordArgumentError(
             abstract, parameter.name, builder_returns, accepts
         )

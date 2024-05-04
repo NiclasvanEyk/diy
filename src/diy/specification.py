@@ -157,6 +157,15 @@ class Specification:
     instructions for how they should be built.
     """
 
+    _implementations: dict[type, type]
+    """
+    Register concrete implementations for protocols or abstract base classes.
+
+    E.g. when something requests an instance of the `DatabaseConnection`
+    protocol, supply them with this specific `PostgresDatbaseConnection` that
+    we've already tought the container how to build.
+    """
+
     def __init__(self) -> None:
         super().__init__()
         self.builders = Builders()
@@ -164,6 +173,13 @@ class Specification:
         self._explicitly_registered_types = set()
 
     def add(self, abstract: type[Any]) -> None:
+        """
+        Simply tell the container, that this type exists.
+
+        This helps containers to verify that this type should be "buildable" in
+        the future. This means that all its parameters should have known
+        constructors.
+        """
         self._explicitly_registered_types.add(abstract)
 
     def types(self) -> set[type[Any]]:

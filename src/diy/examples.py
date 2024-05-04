@@ -1,4 +1,4 @@
-from diy.container import Container, RuntimeContainer, Specification
+from diy.container import RuntimeContainer, Specification
 
 
 class HttpClient:
@@ -11,11 +11,12 @@ class ApiClient:
         self.http = http
 
 
-def api_client() -> Container:
-    spec = Specification()
+spec = Specification()
 
-    @spec.partials.decorate(HttpClient, "base")
-    def build_http_client_base() -> str:
-        return "https://example.com/api"
 
-    return RuntimeContainer(spec)
+@spec.partials.decorate(HttpClient, "base")
+def build_http_client_base() -> str:
+    return "https://example.com/api"
+
+
+container = RuntimeContainer(spec)

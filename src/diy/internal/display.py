@@ -4,6 +4,7 @@ from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
 from sys import stdout
+from types import UnionType
 from typing import Any
 
 from diy.internal.plan import (
@@ -35,6 +36,9 @@ def join_qualified_name(fqn: FQN) -> str:
 
 
 def qualified_name(abstract: str | type[Any] | Callable[..., Any]) -> str:
+    if isinstance(abstract, UnionType):
+        return " | ".join([qualified_name(t) for t in abstract.__args__])
+
     if isinstance(abstract, str):
         return abstract
 
@@ -61,7 +65,9 @@ def bold(subject: str, ansi: bool) -> str:
     return f"\033[1m{subject}\033[0m"
 
 
-def print_resolution_plan(plan: ResolutionPlan, ansi: bool | None = None) -> str:
+def print_resolution_plan(
+    plan: ResolutionPlan[..., Any], ansi: bool | None = None
+) -> str:
     if ansi is None:
         ansi = stdout.isatty()
 
@@ -71,7 +77,8 @@ def print_resolution_plan(plan: ResolutionPlan, ansi: bool | None = None) -> str
     else:
         root_repr = f"{_print_qualified_name(plan.type, ansi)}"
     if isinstance(plan, BuilderBasedResolutionPlan):
-        root_repr += " [!]"
+        name = _print_qualified_name(plan.builder, ansi)
+        root_repr += f" <- {name}"
 
     # If we resolve the whole plan through a single builder, we are done here
     if isinstance(plan, BuilderBasedResolutionPlan):
@@ -79,23 +86,26 @@ def print_resolution_plan(plan: ResolutionPlan, ansi: bool | None = None) -> str
 
     children_repr = ""
 
-    tree: deque[PlanDisplayContainer] = deque(PlanDisplayContainer.map(plan.parameters))
+    tree = deque(PlanDisplayContainer.map(plan.parameters))
     while len(tree) > 0:
         unit = tree.popleft()
         child = unit.node
 
         param_repr = _display_param(child.name, child.type, ansi)
-        child_repr = "│  " * child.depth
+        padding = "│  " if len(tree) > 1 else "   "
+        child_repr = padding * child.depth
         child_repr += f"{"└" if unit.is_last else "├"}─"
         child_repr += f" {param_repr}"
         if isinstance(child, BuilderParameterResolutionPlan):
-            child_repr += " [!]"
+            name = _print_qualified_name(child.builder, ansi)
+            child_repr += f" <- {name}"
         children_repr += f"\n{child_repr}"
 
         if isinstance(child, DefaultParameterResolutionPlan):
             continue
         if isinstance(child, BuilderParameterResolutionPlan):
             continue
+
         for unit in reversed(PlanDisplayContainer.map(child.parameters)):
             tree.appendleft(unit)
 
@@ -105,6 +115,9 @@ def print_resolution_plan(plan: ResolutionPlan, ansi: bool | None = None) -> str
 def _print_qualified_name(
     subject: type[Any] | Callable[..., Any] | None, ansi: bool
 ) -> str:
+    if isinstance(subject, UnionType):
+        return " | ".join([_print_qualified_name(t, ansi) for t in subject.__args__])
+
     if subject is not None:
         (type_module, type_name) = fully_qualify(subject)
     else:

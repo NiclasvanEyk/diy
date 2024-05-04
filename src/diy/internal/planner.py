@@ -102,12 +102,14 @@ class Planner:
                 if is_typelike(parent_type):
                     partial_builder = self.spec.partials.get(parent_type, name)
                     if partial_builder is not None:
+                        return_type = signature(partial_builder).return_annotation
+                        assert return_type is not Parameter.empty
                         args_plan = self.plan_call(partial_builder)
                         parent.parameters.append(
                             BuilderParameterResolutionPlan(
                                 name,
                                 depth + 1,
-                                type=parent_type,
+                                type=return_type,
                                 parent=parent,
                                 builder=partial_builder,
                                 args_plan=args_plan,
