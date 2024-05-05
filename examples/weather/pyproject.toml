@@ -1,9 +1,9 @@
 [project]
-name = "wheather"
+name = "weather"
 version = "0.1.0"
 description = "An example application illustrating dependency injection using diy"
 authors = [{ name = "Niclas van Eyk", email = "niclas.eyk@gmail.com" }]
 readme = "README.md"
 
 [project.scripts]
-w = "wheather.cli:wheather"
+weather = "weather.cli:weather"

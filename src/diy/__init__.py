@@ -1,5 +1,5 @@
 """
-diy is a dependency injection container that reads Pythons native type
+diy is a modern dependency injection container that reads Pythons native type
 annotations, so you don't have to clutter your code with Annotated or other
 library specific markers.
 

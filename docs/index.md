@@ -1,7 +1,7 @@
 # Introduction
 
-`diy` (/ˌdi.aɪˈwaɪ/) is a [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection)
-container that reads Pythons native type annotations, so you don't have to 
+`diy` (/ˌdi.aɪˈwaɪ/) is a modern [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection)
+container that reads Pythons native type annotations, so you don't have to
 clutter your code with `Annotated` or other library specific markers.
 
 ## Getting Started
@@ -22,7 +22,7 @@ import os
 spec = diy.Specification()
 
 # Lets start with the example of an API client, that authenticates by including
-# a secret token in a header. However, it has no hard opinions for how to 
+# a secret token in a header. However, it has no hard opinions for how to
 # retrieve that token. It just takes it as a constructor parameter.
 class ApiClient:
   def __init__(self, token: str):
@@ -41,7 +41,7 @@ Once you are done specifying, you can construct a container based on the specifi
 # Pass the previously constructed spec to your container
 container = diy.RuntimeContainer(spec)
 
-# If we need an instance of our client, we can simply request it from the 
+# If we need an instance of our client, we can simply request it from the
 # container
 api_client = container.resolve(ApiClient)
 
@@ -51,8 +51,8 @@ class UserService:
   def __init__(self, api: ApiClient):
     self.api = api
 
-# Since the UserService class only needs an instance of ApiClient, which we 
-# know how to construct, we in turn assume how a UserService should be 
+# Since the UserService class only needs an instance of ApiClient, which we
+# know how to construct, we in turn assume how a UserService should be
 # constructed.
 user_service = container.resolve(UserService)
 ```

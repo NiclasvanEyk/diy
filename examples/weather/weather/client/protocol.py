@@ -6,7 +6,7 @@ from typing import Protocol
 
 class Conditions(StrEnum):
     """
-    Maps our known states of the wheather.
+    Maps our known states of the weather.
 
     This might be necessary for displaying a certain kind of icon that visually
     supports the displayed data.
@@ -21,9 +21,9 @@ class Conditions(StrEnum):
 
 
 @dataclass
-class CurrentWheather:
+class CurrentWeather:
     """
-    The information that we use to display the current state of the wheather.
+    The information that we use to display the current state of the weather.
     """
 
     city: str
@@ -31,9 +31,9 @@ class CurrentWheather:
     conditions: Conditions
 
 
-class WheatherClient(Protocol):
+class WeatherClient(Protocol):
     @abstractmethod
-    def fetch_current(self, city: str) -> CurrentWheather:
+    def fetch_current(self, city: str) -> CurrentWeather:
         """
-        Somehow fetches current wheather information in our format.
+        Somehow fetches current weather information in our format.
         """

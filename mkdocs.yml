@@ -1,4 +1,5 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
 site_name: diy
 repo_name: NiclasvanEyk/diy
 repo_url: https://github.com/NiclasvanEyk/diy
@@ -24,6 +25,10 @@ theme:
     - navigation.indexes
     - navigation.instant
     - navigation.sections
+    - offline
+    - privacy
+    - search.share
+    - search.suggest
 
 nav:
   - Introduction: "index.md"
@@ -31,15 +36,22 @@ nav:
       - "guide/index.md"
       - Specifications: "guide/specifications.md"
       - Containers: "guide/containers.md"
+      - Tooling: "guide/tooling.md"
   - Examples:
       - "examples/index.md"
-      - Wheather API: "examples/wheather.md"
+      - Weather:
+          - "examples/weather/index.md"
+          - Project Structure: "examples/weather/structure.md"
+          - Protocols: "examples/weather/protocol.md"
+          - MVP: "examples/weather/mvp.md"
+          - First Real Implementation: "examples/weather/real.md"
   - Reference:
       - Guiding Principles: "reference/guiding-principles.md"
       - API Docs: "reference/api-docs.md"
       - Changelog: "reference/changelog.md"
 
 plugins:
+  - search
   - mkdocstrings:
       default_handler: python
       handlers:
