@@ -92,7 +92,7 @@ def print_resolution_plan(
         child = unit.node
 
         param_repr = _display_param(child.name, child.type, ansi)
-        padding = "│  " if len(tree) > 1 else "   "
+        padding = "│  " if len(tree) > 0 else "   "
         child_repr = padding * child.depth
         child_repr += f"{"└" if unit.is_last else "├"}─"
         child_repr += f" {param_repr}"

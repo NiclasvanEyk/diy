@@ -7,7 +7,6 @@ from typing import Any
 from diy.internal.validation import (
     assert_annotates_return_type,
     assert_constructor_has_parameter,
-    assert_parameter_annotation_matches,
 )
 
 
@@ -120,9 +119,15 @@ class Partials:
         """
 
         def decorator(builder: Callable[..., P]) -> Callable[..., Callable[..., P]]:
-            builder_returns = assert_annotates_return_type(builder)
-            parameter = assert_constructor_has_parameter(abstract, name)
-            assert_parameter_annotation_matches(abstract, parameter, builder_returns)
+            # FIXME: This is not strictly required, until the TODO below is implemented
+            assert_annotates_return_type(builder)
+            assert_constructor_has_parameter(abstract, name)
+
+            # TODO: It would be really nice, if we could somehow verify, that
+            # the type returned by the builder is indeed assignable to the
+            # specified parameter.
+            # Maybe this could be implemented as a MyPy plugin, or even with
+            # some type magic based on the paramspec?
             self._by_type[abstract][name] = builder
 
             def inner() -> Callable[..., P]:

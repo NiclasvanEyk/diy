@@ -1,7 +1,6 @@
 import pytest
 
 from diy.errors import (
-    InvalidConstructorKeywordArgumentError,
     MissingConstructorKeywordArgumentError,
     MissingReturnTypeAnnotationError,
 )
@@ -34,13 +33,3 @@ def test_raises_exception_when_registering_partial_for_nonexisting_parameter() -
         @spec.partials.decorate(Greeter, "none_existent")
         def build_greeter() -> str:
             return ""
-
-
-def test_raises_exception_when_registering_partial_with_wrong_parameter_type() -> None:
-    spec = Specification()
-
-    with pytest.raises(InvalidConstructorKeywordArgumentError):
-
-        @spec.partials.decorate(Greeter, "name")
-        def build_wrong_greeter_arg() -> int:
-            return 123

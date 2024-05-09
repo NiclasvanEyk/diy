@@ -45,9 +45,11 @@ def test_it_can_display_long_resolution_plans() -> None:
 ├─ mailer: tests.internal.display_test.Mailer
 │  ├─ transport: tests.internal.display_test.SmtpTransport
 │  │  └─ crypt: tests.internal.display_test.Encrypter
-│  └─ from_addr: tests.internal.display_test.Mailer [!]
+│  └─ from_addr: str <- tests.internal.display_test.test_it_can_display_long_resolution_plans.<locals>.build_mailer_from_addr
 └─ logger: tests.internal.display_test.Logger"""
 
     actual = print_resolution_plan(plan, ansi=False)
+
+    print(actual)
 
     assert snapshot == actual
