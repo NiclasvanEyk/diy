@@ -3,7 +3,7 @@ from typing import override
 from numpy.random import default_rng
 
 from weather.client.protocol import (
-    Conditions,
+    Condition,
     CurrentWeather,
     WeatherClient,
 )
@@ -19,5 +19,5 @@ class RandomWeatherClient(WeatherClient):
         return CurrentWeather(
             city=city,
             temperature=self.rng.normal(loc=15, scale=25),
-            conditions=self.rng.choice(list(Conditions)),
+            conditions=self.rng.choice(list(Condition)),
         )

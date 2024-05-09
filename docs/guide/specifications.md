@@ -9,7 +9,7 @@ Lets start with an example showing _why_ we even need them:
 ```python
 from enum import StrEnum
 
-class HashingAlgorithm:
+class HashingAlgorithm(StrEnum):
   SHA256 = "sha256"
   CRC32 = "crc32"
   MD5 = "md5"

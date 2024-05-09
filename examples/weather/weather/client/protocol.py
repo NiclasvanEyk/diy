@@ -4,7 +4,7 @@ from enum import StrEnum
 from typing import Protocol
 
 
-class Conditions(StrEnum):
+class Condition(StrEnum):
     """
     Maps our known states of the weather.
 
@@ -28,7 +28,7 @@ class CurrentWeather:
 
     city: str
     temperature: float
-    conditions: Conditions
+    conditions: Condition
 
 
 class WeatherClient(Protocol):

@@ -136,3 +136,104 @@ def build_weather_api_client_key() -> str:
 ```
 
 ## Adding Tests
+
+Lets see how we can write automated tests for our new `WeatherApiWeatherClient`.
+
+### Challenges
+
+This is what a test would roughly look like
+
+```python
+# weather/client/wheatherapidotcom_test.py
+from httpx import Client
+from weather.client.protocol import Condition
+from weather.client.wheatherapidotcom import WeatherApiWeatherClient
+
+def test_with_mock_http_client():
+    # This client makes real HTTP requests, which
+    # is most likely not what we want in tests.
+    api_client = WeatherApiWeatherClient(http=Client(), key="s3cret")
+    weather = api_client.fetch_current("New York")
+
+    # This is where we could have problems with real requests.
+    # The weather changes every day, so we can't be sure about
+    # the "right" values. Additionally, our tests would fail
+    # when the external API is down for maintenance, making
+    # them less reliable.
+    assert weather.city == "New York"
+    assert weather.temperature == 12.34
+    assert weather.conditions == Condition.SUNNY
+```
+
+As described in the code comments, our tests has some problems, when we make real HTTP requests.
+
+### Inversion Of Control
+
+However, due to us having properly structured our code, we can easily change this.
+The entity that actually issues the HTTP requests, the `httpx.Client` gets passed to our `WeatherApiWeatherClient`.
+Therefore we can simply swap out the one making real HTTP requests with a fake one.
+
+In `httpx`, this can be realized by swapping out the `transport` of the `Client` ([docs](https://www.python-httpx.org/advanced/transports/#mock-transports)).
+The `MockTransport` allows us to intercept the request and respond with whatever **we** want.
+No actual request is sent to a third-party API.
+
+We do this, by creating a function that receives a `httpx.Request` and returns a `httpx.Response`:
+
+```python hl_lines="7 8 12 13"
+# weather/client/wheatherapidotcom_test.py
+from httpx import Client, MockTransport, Request, Response
+from weather.client.protocol import Condition
+from weather.client.wheatherapidotcom import WeatherApiWeatherClient
+
+
+def request_handler(request: Request) -> Response:
+  return Response(status_code=200)
+
+
+def test_with_mock_http_client():
+    mocked_transport = MockTransport(request_handler)
+    mocked_http_client = Client(transport=mocked_transport)
+    api_client = WeatherApiWeatherClient(
+        http=mocked_http_client, key="s3cret"
+    )
+
+    weather = api_client.fetch_current("New York")
+
+    assert weather.city == "New York"
+    assert weather.temperature == 12.34
+    assert weather.conditions == Condition.SUNNY
+```
+
+As you can see, we then construct a `MockTransport` based upon the `request_handler` function that returns what we want, and pass this as the `transport` parameter to our `httpx.Client`, which then in turn gets passed to our `WeatherApiWeatherClient`.
+
+### Actually Verifying Our Implementation
+
+Lets expand our `request_handler` to run a few assertions on the request and return a response that looks like what the real API would return.
+Remember, we need to include a `key` as a query parameter, as well as the city we want to receive the weather for.
+
+```python
+import json
+from httpx import Request, Response
+
+def request_handler(request: Request) -> Response:
+    query_params = {
+        key.decode("utf8"): val.decode("utf8")
+        for key, val in parse_qsl(request.url.query)
+    }
+    assert query_params["q"] == "New York"
+    assert query_params["key"] == "s3cret"
+
+    return Response(
+        status_code=200,
+        content=json.dumps(
+            {
+                "location": { "name": "New York" },
+                "current": {
+                    "temp_c": 12.34,
+                    "condition": { "code": 1000 },
+                },
+            }
+        ),
+    )
+```
+

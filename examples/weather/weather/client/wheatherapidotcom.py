@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 
 from httpx import Client, Response
 
-from weather.client.protocol import Conditions, CurrentWeather, WeatherClient
+from weather.client.protocol import Condition, CurrentWeather, WeatherClient
 
 
 class WeatherApiWeatherClient(WeatherClient):
@@ -30,13 +30,13 @@ class WeatherApiWeatherClient(WeatherClient):
             conditions=self._map_conditions(body["current"]["condition"]["code"]),
         )
 
-    def _map_conditions(self, code: int) -> Conditions:
+    def _map_conditions(self, code: int) -> Condition:
         # Full list at https://www.weatherapi.com/docs/weather_conditions.json
         # This implementation is abbreviated on purpose.
         if code == 1000:
-            return Conditions.SUNNY
+            return Condition.SUNNY
         if code == 1006:
-            return Conditions.CLOUDY
+            return Condition.CLOUDY
         if code > 1183 and code <= 1282:
-            return Conditions.RAINING
-        return Conditions.WINDY
+            return Condition.RAINING
+        return Condition.WINDY

@@ -9,7 +9,7 @@ The most boring implementation is one that always returns the same weather for e
 It is not very practical, but is enough to be used for unit tests of our other components, that require an implementation to be useful.
 
 ```python
-# weather/clients/constant.py
+# weather/client/constant.py
 from typing import override
 from weather.client.protocol import CurrentWeather, WeatherClient
 
@@ -131,10 +131,10 @@ def test_cities_with_numbers_get_rejected():
 
 And now we validate that everything still works:
 
-```
+```text
 pytest --no-header
 ======================= test session starts =================================
-collected 2 items                                                                                                          
+collected 2 items
 
 weather/http_test.py ..                                                [100%]
 
