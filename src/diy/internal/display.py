@@ -37,7 +37,7 @@ def join_qualified_name(fqn: FQN) -> str:
 
 def qualified_name(abstract: str | type[Any] | Callable[..., Any]) -> str:
     if isinstance(abstract, UnionType):
-        return " | ".join([qualified_name(t) for t in abstract.__args__])
+        return " | ".join([qualified_name(t) for t in abstract.__args__])  # type: ignore[generalTypeIssues]
 
     if isinstance(abstract, str):
         return abstract
@@ -116,7 +116,7 @@ def _print_qualified_name(
     subject: type[Any] | Callable[..., Any] | None, ansi: bool
 ) -> str:
     if isinstance(subject, UnionType):
-        return " | ".join([_print_qualified_name(t, ansi) for t in subject.__args__])
+        return " | ".join([_print_qualified_name(t, ansi) for t in subject.__args__])  # type: ignore[generalTypeIssues]
 
     if subject is not None:
         (type_module, type_name) = fully_qualify(subject)

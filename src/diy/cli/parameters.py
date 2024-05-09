@@ -1,8 +1,8 @@
 from importlib import import_module
 from types import ModuleType
-from typing import Any
+from typing import Any, override
 
-from click import ParamType
+from click import Context, ParamType
 
 from diy import Container
 
@@ -38,7 +38,8 @@ def resolve_import_specifier(specifier: str) -> str | tuple[ModuleType, Any]:
 
 
 class ImportSpecifierParamType(ParamType):
-    def convert(self, value: Any, param, ctx) -> Any:
+    @override
+    def convert(self, value: Any, param: Any, ctx: Context | None) -> Any:
         if not isinstance(value, str):
             self.fail(f"{value!r} is not a valid string", param, ctx)
 
@@ -46,15 +47,15 @@ class ImportSpecifierParamType(ParamType):
         if isinstance(result, str):
             self.fail(result, param, ctx)
 
-        module, value = result
-        return value
+        return result[1]
 
 
 IMPORT_SPECIFIER = ImportSpecifierParamType()
 
 
 class ContainerImportSpecifierParamType(ParamType):
-    def convert(self, value: Any, param, ctx) -> Any:
+    @override
+    def convert(self, value: Any, param: Any, ctx: Context | None) -> Any:
         if not isinstance(value, str):
             self.fail(f"{value!r} is not a valid string", param, ctx)
 
@@ -62,7 +63,7 @@ class ContainerImportSpecifierParamType(ParamType):
         if isinstance(result, str):
             self.fail(result, param, ctx)
 
-        module, subject = result
+        _, subject = result
 
         if callable(subject):
             subject = subject()

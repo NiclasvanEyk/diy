@@ -50,6 +50,4 @@ def test_it_can_display_long_resolution_plans() -> None:
 
     actual = print_resolution_plan(plan, ansi=False)
 
-    print(actual)
-
     assert snapshot == actual

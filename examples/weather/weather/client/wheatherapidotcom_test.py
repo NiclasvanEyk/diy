@@ -33,7 +33,7 @@ def request_handler(request: Request) -> Response:
     )
 
 
-def test_with_mock_http_client():
+def test_with_mock_http_client() -> None:
     api_client = WeatherApiWeatherClient(
         http=Client(transport=MockTransport(request_handler)),
         key="s3cret",

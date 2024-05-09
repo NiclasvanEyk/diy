@@ -21,7 +21,7 @@ def plan(container: Container, subject: Any = None) -> None:
     called.
     """
 
-    planner = container._planner
+    planner = container._planner  # noqa: SLF001
     if not isinstance(planner, Planner):
         echo(
             f"_planner attribute of {container!r} does not contain an instance of diy.Planner!"

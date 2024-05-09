@@ -12,7 +12,7 @@ def test_it_throws_for_unknown_dependencies() -> None:
     spec = Specification()
     spec.add(ApiClient)
 
-    with pytest.raises(FailedToInferDependencyError) as exception:
+    with pytest.raises(FailedToInferDependencyError):
         VerifyingContainer(spec)
 
 
@@ -26,5 +26,4 @@ def test_it_throws_for_builder_dependencies() -> None:
     with pytest.raises(FailedToInferDependencyError) as exception:
         VerifyingContainer(spec)
 
-    print(exception.value.plan)
     assert exception.value.subject == ApiClient

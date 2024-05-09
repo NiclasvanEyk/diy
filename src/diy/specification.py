@@ -74,6 +74,9 @@ class Builders:
         """
         return self._by_type.get(abstract)
 
+    def types(self) -> set[type[Any]]:
+        return set(self._by_type.keys())
+
 
 class Partials:
     """
@@ -143,6 +146,9 @@ class Partials:
         """
         return self._by_type[abstract].get(name)
 
+    def types(self) -> set[type[Any]]:
+        return set(self._by_type.keys())
+
 
 class Specification:
     """
@@ -188,7 +194,7 @@ class Specification:
         self._explicitly_registered_types.add(abstract)
 
     def types(self) -> set[type[Any]]:
-        types = set(self.builders._by_type.keys())
-        types.update(self.partials._by_type.keys())
+        types = self.builders.types()
+        types.update(self.partials.types())
         types.update(self._explicitly_registered_types)
         return types

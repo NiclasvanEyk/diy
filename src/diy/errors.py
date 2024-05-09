@@ -144,7 +144,5 @@ class InvalidConstructorKeywordArgumentError(DiyError):
         required: type[Any],
     ) -> None:
         target = f"{qualified_name(abstract)}::{name}"
-        print(repr(required))
-        print(repr(provided))
-        message = f"Tried to register partial builder for {target.__repr__()}. The builder returns '{qualified_name(provided)}', but {target} accepts '{qualified_name(required)}'!"
+        message = f"Tried to register partial builder for {target}. The builder returns '{qualified_name(provided)}', but {target} accepts '{qualified_name(required)}'!"
         super().__init__(message)

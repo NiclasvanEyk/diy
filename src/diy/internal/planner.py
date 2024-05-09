@@ -126,7 +126,7 @@ class Planner:
                         name=name,
                         depth=depth + 1,
                         type=type(parameter.default),
-                        parent=parent,
+                        parent=parent,  # type: ignore[reportArgumentType]
                     )
                 )
                 continue
@@ -153,7 +153,7 @@ class Planner:
                         name=parameter.name,
                         depth=depth + 1,
                         type=abstract,
-                        parent=parent,
+                        parent=parent,  # type: ignore[reportArgumentType]
                         builder=builder,
                         args_plan=args_plan,
                     )
@@ -169,7 +169,7 @@ class Planner:
                 name=name,
                 depth=depth + 1,
                 type=abstract,
-                parent=parent,
+                parent=parent,  # type: ignore[reportArgumentType]
             )
             parent.parameters.append(plan)
             self._fill_plan_based_on_inference(abstract, plan, root)
