@@ -31,6 +31,8 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - uses: jakebailey/pyright-action@v2
+        with:
+          args: src
       - name: Lint
         run: ruff check --output-format=github
       - name: Format
