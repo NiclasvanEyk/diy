@@ -183,18 +183,8 @@ class Specification:
         self.partials = Partials()
         self._explicitly_registered_types = set()
 
-    def add(self, abstract: type[Any]) -> None:
-        """
-        Simply tell the container, that this type exists.
-
-        This helps containers to verify that this type should be "buildable" in
-        the future. This means that all its parameters should have known
-        constructors.
-        """
-        self._explicitly_registered_types.add(abstract)
-
     @overload
-    def decorate[T](self, builder: Callable[..., T]) -> Callable[..., T]:
+    def add[T](self, builder: Callable[..., T]) -> Callable[..., T]:
         """
         Mark an existing function as a builder for an abstract type.
 
@@ -209,7 +199,7 @@ class Specification:
         ...
         >>> spec = Specification()
         ...
-        >>> @spec.decorate
+        >>> @spec.add
         ... def build_greeter() -> Greeter:
         ...   return Greeter("Ella")
         ...
@@ -220,7 +210,7 @@ class Specification:
         """
 
     @overload
-    def decorate[T](self, builder: type[T], name: str) -> Callable[..., T]:
+    def add[T](self, builder: type[T], name: str) -> Callable[..., T]:
         """
         Mark the function as a supplier for the named constructor parameter of
         the given type.
@@ -249,11 +239,25 @@ class Specification:
         Ella
         """
 
-    def decorate[T](
+    @overload
+    def add(self, builder: type[Any]) -> None:
+        """
+        Simply tell the container, that this type exists.
+
+        This helps containers to verify that this type should be "buildable" in
+        the future. This means that all its parameters should have known
+        constructors.
+        """
+
+    def add[T](
         self, builder: Callable[..., Any] | type[T], name: str | None = None
-    ) -> Callable[..., Any]:
-        if name is None and isinstance(builder, Callable):
-            return self.builders.decorate(builder)
+    ) -> Callable[..., Any] | None:
+        if name is None:
+            if isinstance(builder, type):
+                self._explicitly_registered_types.add(builder)
+                return None
+            if callable(builder):
+                return self.builders.decorate(builder)
 
         if isinstance(builder, type) and isinstance(name, str):
             return self.partials.decorate(builder, name)

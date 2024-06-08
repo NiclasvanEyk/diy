@@ -102,7 +102,7 @@ from httpx import Client
 
 # ...
 
-@spec.decorate
+@spec.add
 def build_weather_api_client() -> WeatherApiWeatherClient:
     http = Client()
     api_key = "s3cr3t"
@@ -128,7 +128,7 @@ from os import environ
 
 # ...
 
-@spec.partials.decorate(WeatherApiWeatherClient, "key")
+@spec.partials.add(WeatherApiWeatherClient, "key")
 def build_weather_api_client_key() -> str:
     return "s3cr3t"
 

@@ -15,7 +15,7 @@ class Greeter:
 spec = diy.Specification()
 
 # Decorator approach
-@spec.decorate
+@spec.add
 def build_greeter() -> Greeter:
   return Greeter()
 

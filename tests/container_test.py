@@ -92,7 +92,7 @@ class ApiClient:
 def test_container_can_instantiate_kwargs_only_constructors() -> None:
     spec = Specification()
 
-    @spec.decorate
+    @spec.add
     def build_api_client() -> ApiClient:
         return ApiClient("test")
 
@@ -112,7 +112,7 @@ def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spe
 ):
     spec = Specification()
 
-    @spec.decorate
+    @spec.add
     def build_api_client() -> ApiClient:
         return ApiClient("test")
 
@@ -145,7 +145,7 @@ def test_it_can_inject_itself_via_protocols() -> None:
     #       specific use-case, it is convenient. Though I guess it feelds more
     #       proper to support injecting builder arguments from the container
     #       instead.
-    @spec.decorate
+    @spec.add
     def inject_self() -> Container:
         return container
 
@@ -170,7 +170,7 @@ def test_raises_exception_when_registering_partial_for_unannotated_parameter() -
 def test_it_can_resolve_when_all_args_have_registered_partials() -> None:
     spec = Specification()
 
-    @spec.partials.decorate(Greeter, "name")
+    @spec.add(Greeter, "name")
     def build_greeter_name() -> str:
         return "foo"
 
@@ -186,7 +186,7 @@ def test_it_prefers_partial_builders_to_default_args() -> None:
 
     spec = Specification()
 
-    @spec.partials.decorate(DefaultGreeter, "name")
+    @spec.add(DefaultGreeter, "name")
     def build_default_greeter() -> str:
         return "override"
 
@@ -219,11 +219,11 @@ def test_it_can_build_types_based_on_annotations() -> None:
 
     spec = Specification()
 
-    @spec.decorate
+    @spec.add
     def build_pfp_bucket() -> ProfilePicturesBucket:
         return CloudBucket("s3:profile_pictures")
 
-    @spec.decorate
+    @spec.add
     def build_og_bucket() -> OpenGraphImagesBucket:
         return CloudBucket("do:og-images")
 
@@ -244,7 +244,7 @@ class ConfigStore:
 def test_it_supplies_builders_with_args_from_the_container() -> None:
     spec = Specification()
 
-    @spec.decorate
+    @spec.add
     def build_api_client(config: ConfigStore) -> ApiClient:
         return ApiClient(config.get("token"))
 
@@ -263,7 +263,7 @@ class ConsumesApiClient:
 def test_it_supplies_nested_builders_with_args_from_the_container() -> None:
     spec = Specification()
 
-    @spec.decorate
+    @spec.add
     def build_api_client(config: ConfigStore) -> ApiClient:
         return ApiClient(config.get("api_base"))
 

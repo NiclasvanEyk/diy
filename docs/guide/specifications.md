@@ -40,7 +40,7 @@ And this is where specs come into play.
 
 
 ```python
-@spec.decorate
+@spec.add
 def build_hasher() -> PasswordHasher:
   return PasswordHasher(HashingAlgorithm.CRC32)
 ```
@@ -153,11 +153,11 @@ from app.cloud.digitalocean import DoSpacesBucket # Another one from a different
 
 spec = diy.Specification()
 
-@spec.decorate
+@spec.add
 def build_profile_pictures_bucket() -> ProfilePicturesBucket:
   return S3CloudStorageBucket("arn:aws:s3:::profile-pictures")
 
-@spec.decorate
+@spec.add
 def build_og_images_bucket() -> OpenGraphImagesBucket:
   return DoSpacesBucket("/images/og")
 ```

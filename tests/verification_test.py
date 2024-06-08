@@ -19,7 +19,7 @@ def test_it_throws_for_unknown_dependencies() -> None:
 def test_it_throws_for_builder_dependencies() -> None:
     spec = Specification()
 
-    @spec.decorate
+    @spec.add
     def build_user_service(api: ApiClient) -> UserService:
         return UserService()
 

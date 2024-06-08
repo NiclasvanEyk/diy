@@ -25,7 +25,7 @@ class UserService:
 
 spec = Specification()
 
-@spec.decorate
+@spec.add
 def build_database_connection() -> DatabaseConnection:
   return connect_to_database(os.environ["DATABASE_URL"])
 

@@ -21,7 +21,7 @@ def is_typelike(subject: object) -> bool:
 
 def assert_is_typelike(subject: object) -> None:
     if not is_typelike(subject):
-        message = "return type should be a type!"
+        message = f"return type should be a type, got {subject!r}"
         raise TypeError(message)
 
 

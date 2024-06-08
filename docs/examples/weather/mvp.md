@@ -41,7 +41,7 @@ from weather.client.constant import ConstantWeatherClient
 
 spec = Specification()
 
-@spec.decorate
+@spec.add
 def build_weather_client() -> WeatherClient:
     return ConstantWeatherClient(
         CurrentWeather(

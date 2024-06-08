@@ -10,7 +10,7 @@ spec = Specification()
 # This function tells us how our application builds a client returning random
 # weather information. This might be useful for unit testing environments,
 # where we only want to test e.g. the HTTP endpoint or a CLI function.
-@spec.partials.decorate(RandomWeatherClient, "seed")
+@spec.add(RandomWeatherClient, "seed")
 def build_random_weather_client_seed() -> int | None:
     if "WEATHER_SEED" not in environ:
         return None
@@ -22,7 +22,7 @@ def build_random_weather_client_seed() -> int | None:
 # container, it will construct the RandomWeatherClient and use the seed
 # argument as defined in our build_random_whather_client_seed function from
 # above.
-@spec.decorate
+@spec.add
 def build_weather_client(random: RandomWeatherClient) -> WeatherClient:
     return random
 
