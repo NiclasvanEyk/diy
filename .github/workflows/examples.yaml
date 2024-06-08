@@ -1,4 +1,4 @@
-name: Validate
+name: Examples
 
 on:
   push:
@@ -21,17 +21,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
+        working-directory: ./examples/weather
         run: |
+          cd examples/weather
           python -m pip install --upgrade pip
-          pip install -r requirements.lock -r requirements-dev.lock
+          pip install -r requirements.txt
       - name: Test
-        run: pytest --cov --cov-branch --doctest-modules ./tests/
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+        working-directory: ./examples/weather
+        run: pytest --cov --cov-branch --doctest-modules
       - uses: jakebailey/pyright-action@v2
       - name: Lint
+        working-directory: ./examples/weather
         run: ruff check --output-format=github
       - name: Format
+        working-directory: ./examples/weather
         run: ruff format --diff
