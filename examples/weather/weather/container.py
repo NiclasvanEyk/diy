@@ -22,7 +22,7 @@ def build_random_weather_client_seed() -> int | None:
 # container, it will construct the RandomWeatherClient and use the seed
 # argument as defined in our build_random_whather_client_seed function from
 # above.
-@spec.builders.decorate
+@spec.decorate
 def build_weather_client(random: RandomWeatherClient) -> WeatherClient:
     return random
 

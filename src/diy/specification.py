@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable
-from typing import Any
+from typing import Any, overload
 
 from diy.internal.validation import (
     assert_annotates_return_type,
@@ -192,6 +192,94 @@ class Specification:
         constructors.
         """
         self._explicitly_registered_types.add(abstract)
+
+    @overload
+    def decorate[T](self, builder: Callable[..., T]) -> Callable[..., T]:
+        """
+        Mark an existing function as a builder for an abstract type.
+
+        >>> from diy import Specification
+        ...
+        >>> class Greeter:
+        ...   def __init__(self, name: str):
+        ...     self.name = name
+        ...
+        ...   def greet(self):
+        ...     print(f"Hello {self.name}!")
+        ...
+        >>> spec = Specification()
+        ...
+        >>> @spec.decorate
+        ... def build_greeter() -> Greeter:
+        ...   return Greeter("Ella")
+        ...
+        >>> builder = spec.builders.get(Greeter)
+        >>> instance = builder()
+        >>> instance.greet()
+        Hello Ella!
+        """
+
+    @overload
+    def decorate[T](self, builder: type[T], name: str) -> Callable[..., T]:
+        """
+        Mark the function as a supplier for the named constructor parameter of
+        the given type.
+
+        >>> from diy import Specification
+        ...
+        >>> class Simple: pass
+        ...
+        >>> class Greeter:
+        ...   def __init__(self, name: str, simple: Simple):
+        ...     self.name = name
+        ...     self.simple = simple
+        ...
+        ...   def greet(self):
+        ...     print(f"Hello {self.name}!")
+        ...
+        >>> spec = Specification()
+        ...
+        >>> @spec.partials.decorate(Greeter, "name")
+        ... def build_greeter_name() -> str:
+        ...   return "Ella"
+        ...
+        >>> builder = spec.partials.get(Greeter, "name")
+        >>> instance = builder()
+        >>> print(builder())
+        Ella
+        """
+
+    def decorate[T](
+        self, builder: Callable[..., Any] | type[T], name: str | None = None
+    ) -> Callable[..., Any]:
+        if name is None and isinstance(builder, Callable):
+            return self.builders.decorate(builder)
+
+        if isinstance(builder, type) and isinstance(name, str):
+            return self.partials.decorate(builder, name)
+
+        message = (
+            "You can either `decorate` a builder function without passing parameters, or specify an abstract type and a the name of one of it's constructor arguments!",
+        )
+        raise TypeError(message)
+
+    @overload
+    def get[T](self, abstract: type[T]) -> Callable[..., T] | None:
+        """
+        Retrieve a bound builder function.
+        """
+
+    @overload
+    def get(self, abstract: type[Any], name: str) -> Callable[..., Any] | None:
+        """
+        Retrieve a bound partial builder function.
+        """
+
+    def get(self, abstract: type[Any], name: str | None) -> Callable[..., Any] | None:  # type: ignore
+        if name is None:
+            return self.builders.get(abstract)
+
+        return self.partials.get(abstract, name)
 
     def types(self) -> set[type[Any]]:
         types = self.builders.types()

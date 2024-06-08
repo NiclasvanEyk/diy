@@ -25,7 +25,7 @@ class UserService:
 
 spec = Specification()
 
-@spec.builders.decorate
+@spec.decorate
 def build_database_connection() -> DatabaseConnection:
   return connect_to_database(os.environ["DATABASE_URL"])
 
@@ -131,7 +131,7 @@ Some questions are:
 
 - What type required did we need a `DatabaseConnection` in the first place?
 - What did go wrong? Were there wrong credentials or did I use the wrong port? Is the database even running?
-- 
+-
 
 ### Good Example
 

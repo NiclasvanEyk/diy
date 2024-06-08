@@ -102,7 +102,7 @@ from httpx import Client
 
 # ...
 
-@spec.builders.decorate
+@spec.decorate
 def build_weather_api_client() -> WeatherApiWeatherClient:
     http = Client()
     api_key = "s3cr3t"

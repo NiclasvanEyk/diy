@@ -30,7 +30,7 @@ class ApiClient:
 
 # We now teach our spec how to build an instance of this class, by reading the
 # token from an environment variable.
-@spec.builders.decorate
+@spec.decorate
 def build_api_client() -> ApiClient:
   return ApiClient(token=os.environ["API_TOKEN"])
 ```

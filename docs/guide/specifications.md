@@ -40,7 +40,7 @@ And this is where specs come into play.
 
 
 ```python
-@spec.builders.decorate
+@spec.decorate
 def build_hasher() -> PasswordHasher:
   return PasswordHasher(HashingAlgorithm.CRC32)
 ```
@@ -93,7 +93,7 @@ def build_user_service(
 ```
 
 This works, but leads to more code, the more arguments our `UserService` has.
-We also 
+We also
 
 ## Leveraging Annotated Types
 
@@ -153,11 +153,11 @@ from app.cloud.digitalocean import DoSpacesBucket # Another one from a different
 
 spec = diy.Specification()
 
-@spec.builders.decorate
+@spec.decorate
 def build_profile_pictures_bucket() -> ProfilePicturesBucket:
   return S3CloudStorageBucket("arn:aws:s3:::profile-pictures")
 
-@spec.builders.decorate
+@spec.decorate
 def build_og_images_bucket() -> OpenGraphImagesBucket:
   return DoSpacesBucket("/images/og")
 ```
