@@ -17,7 +17,7 @@ from diy.internal.plan import (
     InferenceParameterResolutionPlan,
 )
 from diy.internal.validation import assert_is_typelike, is_typelike
-from diy.specification import Specification
+from diy.specification.protocol import SpecificationProtocol
 
 
 class Planner:
@@ -26,7 +26,7 @@ class Planner:
     The plan is based upon the spec provided to the builder upon instantiation.
     """
 
-    def __init__(self, spec: Specification) -> None:
+    def __init__(self, spec: SpecificationProtocol) -> None:
         super().__init__()
         self.spec = spec
 
@@ -39,7 +39,7 @@ class Planner:
         assert_is_instantiable(subject)
 
         # maybe we already know how to build this
-        builder = self.spec.builders.get(subject)
+        builder = self.spec.get(subject)
         if builder is not None:
             args_plan = self.plan_call(builder)
             return BuilderBasedResolutionPlan(subject, builder, args_plan)
@@ -100,7 +100,7 @@ class Planner:
             ):
                 parent_type = parent.type
                 if is_typelike(parent_type):
-                    partial_builder = self.spec.partials.get(parent_type, name)
+                    partial_builder = self.spec.get(parent_type, name)
                     if partial_builder is not None:
                         return_type = signature(partial_builder).return_annotation
                         assert return_type is not Parameter.empty
@@ -145,7 +145,7 @@ class Planner:
             assert_is_typelike(abstract)
 
             # If the user told us to resolve this type in a specific way, use it
-            builder = self.spec.builders.get(abstract)
+            builder = self.spec.get(abstract)
             if builder is not None:
                 args_plan = self.plan_call(builder)
                 parent.parameters.append(

@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable
-from typing import Any, overload
+from typing import Any, override
 
 from diy.internal.validation import (
     assert_annotates_return_type,
     assert_constructor_has_parameter,
 )
+from diy.specification.protocol import SpecificationProtocol
 
 
 class Builders:
@@ -150,10 +151,9 @@ class Partials:
         return set(self._by_type.keys())
 
 
-class Specification:
+class Specification(SpecificationProtocol):
     """
-    Registers functions that construct certain types.
-    Intended to be used by a :class:`diy.Container`.
+    Registers functions that construct certain types or parameters.
     """
 
     builders: Builders
@@ -183,75 +183,10 @@ class Specification:
         self.partials = Partials()
         self._explicitly_registered_types = set()
 
-    @overload
-    def add[T](self, builder: Callable[..., T]) -> Callable[..., T]:
-        """
-        Mark an existing function as a builder for an abstract type.
-
-        >>> from diy import Specification
-        ...
-        >>> class Greeter:
-        ...   def __init__(self, name: str):
-        ...     self.name = name
-        ...
-        ...   def greet(self):
-        ...     print(f"Hello {self.name}!")
-        ...
-        >>> spec = Specification()
-        ...
-        >>> @spec.add
-        ... def build_greeter() -> Greeter:
-        ...   return Greeter("Ella")
-        ...
-        >>> builder = spec.builders.get(Greeter)
-        >>> instance = builder()
-        >>> instance.greet()
-        Hello Ella!
-        """
-
-    @overload
-    def add[T](self, builder: type[T], name: str) -> Callable[..., T]:
-        """
-        Mark the function as a supplier for the named constructor parameter of
-        the given type.
-
-        >>> from diy import Specification
-        ...
-        >>> class Simple: pass
-        ...
-        >>> class Greeter:
-        ...   def __init__(self, name: str, simple: Simple):
-        ...     self.name = name
-        ...     self.simple = simple
-        ...
-        ...   def greet(self):
-        ...     print(f"Hello {self.name}!")
-        ...
-        >>> spec = Specification()
-        ...
-        >>> @spec.partials.decorate(Greeter, "name")
-        ... def build_greeter_name() -> str:
-        ...   return "Ella"
-        ...
-        >>> builder = spec.partials.get(Greeter, "name")
-        >>> instance = builder()
-        >>> print(builder())
-        Ella
-        """
-
-    @overload
-    def add(self, builder: type[Any]) -> None:
-        """
-        Simply tell the container, that this type exists.
-
-        This helps containers to verify that this type should be "buildable" in
-        the future. This means that all its parameters should have known
-        constructors.
-        """
-
+    @override
     def add[T](
         self, builder: Callable[..., Any] | type[T], name: str | None = None
-    ) -> Callable[..., Any] | None:
+    ) -> Callable[..., T] | Callable[..., Any] | None:
         if name is None:
             if isinstance(builder, type):
                 self._explicitly_registered_types.add(builder)
@@ -267,26 +202,19 @@ class Specification:
         )
         raise TypeError(message)
 
-    @overload
-    def get[T](self, abstract: type[T]) -> Callable[..., T] | None:
-        """
-        Retrieve a bound builder function.
-        """
-
-    @overload
-    def get(self, abstract: type[Any], name: str) -> Callable[..., Any] | None:
-        """
-        Retrieve a bound partial builder function.
-        """
-
+    @override
     def get(self, abstract: type[Any], name: str | None) -> Callable[..., Any] | None:  # type: ignore
         if name is None:
             return self.builders.get(abstract)
 
         return self.partials.get(abstract, name)
 
+    @override
     def types(self) -> set[type[Any]]:
         types = self.builders.types()
         types.update(self.partials.types())
         types.update(self._explicitly_registered_types)
         return types
+
+
+__all__ = ["Specification"]

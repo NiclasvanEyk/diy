@@ -4,63 +4,65 @@
 container that reads Pythons native type annotations, so you don't have to
 clutter your code with `Annotated` or other library specific markers.
 
-## Getting Started
+## Quickstart
 
-First, install the package using your favourite package manager
+1. Install the package using your favourite package manager
+   ```shell
+   pip install diy
+   ```
+2. Construct a `diy.Container` instance
+   ```python
+   from diy import Container
 
-```shell
-pip install diy
-```
+   container = Container()
+   ```
+3. Teach the container how to construct a type
+   ```python
+   class Greeter():
+       def __init__(self, name: str) -> None:
+           self.name = name
 
-Then start specifying how to construct objects of a certain type:
+       def greet(self) -> None:
+           print(f"Oh, hi {self.name}!")
 
-```python
-import diy
-import os
+   @container.add
+   def build_greeter() -> Greeter:
+       return Greeter(name="Mark")
+   ```
+4. Use the `container` to construct types
+   ```python
+   greeter = container.resolve(Greeter)
+   greeter.greet()
+   # "Oh, hi Mark!"
+   ```
+   or to call functions
+   ```python
+   def greet_twice(greeter: Greeter) -> None:
+       greeter.greet()
+       greeter.greet()
 
-# Our specification tells the container how to construct types
-spec = diy.Specification()
+   container.call(greet_twice)
+   # "Oh, hi Mark!"
+   # "Oh, hi Mark!"
+   ```
 
-# Lets start with the example of an API client, that authenticates by including
-# a secret token in a header. However, it has no hard opinions for how to
-# retrieve that token. It just takes it as a constructor parameter.
-class ApiClient:
-  def __init__(self, token: str):
-    self.token = token
+This quickstart is a bit abstract and not that impressive.
 
-# We now teach our spec how to build an instance of this class, by reading the
-# token from an environment variable.
-@spec.add
-def build_api_client() -> ApiClient:
-  return ApiClient(token=os.environ["API_TOKEN"])
-```
+If you are not familiar with dependency injection containers, you may want to
+have a look at the (weather example application)[/examples/weather]. It
+showcases their benefits using `diy` for building a service independant weather
+application.
 
-Once you are done specifying, you can construct a container based on the specification:
+If you already know what such containers can do, `diy` containers can also do
+all of the following
 
-```python
-# Pass the previously constructed spec to your container
-container = diy.RuntimeContainer(spec)
+- visualize how a specific class would be resolved from the container
+- verify that all classes known to the container can actually be constructed
+- make a readonly version of your container that disallows new
 
-# If we need an instance of our client, we can simply request it from the
-# container
-api_client = container.resolve(ApiClient)
+> TODO: Link to the docs for each of the example
 
-# Additionally, if we have classes that only depend on classes that we already
-# know how to construct, we don't need to specify them explicitly.
-class UserService:
-  def __init__(self, api: ApiClient):
-    self.api = api
-
-# Since the UserService class only needs an instance of ApiClient, which we
-# know how to construct, we in turn assume how a UserService should be
-# constructed.
-user_service = container.resolve(UserService)
-```
-
-This was just a simple example.
 To learn about more features, you can move forward and read through [the guide](/guide).
-It into more detail about how to solve certain edge cases, such as only defining how certain parameters should be resolved, or how to opt-out of the implicit resolving and construct the `UserService` in a different way.
-
-Alternatively you could look at [some more in-depth examples](/examples).
-They show how `diy` works in a real-world scenario, and how using its `Container`s make e.g. testing easier.
-
+It goes into more detail about how to solve certain edge cases, such as only
+defining how certain parameters should be resolved, or how to opt-out of the
+implicit resolving and construct the `UserService` in a different way.

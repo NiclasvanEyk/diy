@@ -37,6 +37,7 @@ nav:
       - Specifications: "guide/specifications.md"
       - Containers: "guide/containers.md"
       - Tooling: "guide/tooling.md"
+      - CLI: "guide/cli.md"
   - Examples:
       - "examples/index.md"
       - Weather:
