@@ -4,6 +4,22 @@ version = "0.1.0"
 description = "An example application illustrating dependency injection using diy"
 authors = [{ name = "Niclas van Eyk", email = "niclas.eyk@gmail.com" }]
 readme = "README.md"
+dependencies = [
+  "httpx",
+  "fastapi",
+  "click",
+  "numpy",
+  "pytest",
+  "pytest-cov",
+  "ruff",
+]
 
 [project.scripts]
 weather = "weather.cli:weather"
+
+[tool.rye]
+managed = true
+
+
+[tool.diy.containers]
+default = "weather.container:container"

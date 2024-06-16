@@ -4,8 +4,7 @@ from typing import Annotated, Any
 
 import pytest
 
-from diy import RuntimeContainer, Specification
-from diy.container import Container
+from diy import Container, Specification
 from diy.errors import (
     FailedToInferDependencyError,
     MissingConstructorKeywordTypeAnnotationError,
@@ -24,7 +23,7 @@ class ConstructorWithWeirdArgs:
 
 
 def test_container_reports_uninstantiable_types() -> None:
-    container = RuntimeContainer()
+    container = Container()
 
     with pytest.raises(UninstanciableTypeError):
         container.resolve(ConstructurWithoutSelf)
@@ -53,7 +52,7 @@ class ConstructorWithOnlySelf:
 def test_container_can_instantiate_constructors_that_require_no_arguments(
     abstract: type[Any],
 ) -> None:
-    container = RuntimeContainer()
+    container = Container()
     instance = container.resolve(abstract)
     assert isinstance(instance, abstract)
 
@@ -66,13 +65,13 @@ def test_container_can_instantiate_constructors_that_only_require_default_argume
             super().__init__()
             self.name = name
 
-    container = RuntimeContainer()
+    container = Container()
     instance = container.resolve(ConstructorWithOneDefaultArgument)
     assert isinstance(instance, ConstructorWithOneDefaultArgument)
 
 
 def test_container_actually_resolves_the_default_arguments() -> None:
-    container = RuntimeContainer()
+    container = Container()
 
     sentinel = object()
 
@@ -96,7 +95,7 @@ def test_container_can_instantiate_kwargs_only_constructors() -> None:
     def build_api_client() -> ApiClient:
         return ApiClient("test")
 
-    container = RuntimeContainer(spec)
+    container = Container(spec)
     instance = container.resolve(ApiClient)
     assert isinstance(instance, ApiClient)
 
@@ -116,7 +115,7 @@ def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spe
     def build_api_client() -> ApiClient:
         return ApiClient("test")
 
-    container = RuntimeContainer(spec)
+    container = Container(spec)
     instance = container.resolve(ImplicitlyResolvesApiClient)
     assert isinstance(instance, ImplicitlyResolvesApiClient)
 
@@ -129,7 +128,7 @@ class Greeter:
 
 def test_it_throws_when_type_cannot_be_resolved() -> None:
     spec = Specification()
-    container = RuntimeContainer(spec)
+    container = Container(spec)
 
     with pytest.raises(FailedToInferDependencyError):
         container.resolve(Greeter)
@@ -137,7 +136,7 @@ def test_it_throws_when_type_cannot_be_resolved() -> None:
 
 def test_it_can_inject_itself_via_protocols() -> None:
     spec = Specification()
-    container = RuntimeContainer(spec)
+    container = Container(spec)
 
     # TODO: Not sure if adding to the spec _after_ handing it into a container
     #       should have an effect on the container. Could be prevented by deep-
@@ -161,7 +160,7 @@ class UnannotatedGreeter:
 
 def test_raises_exception_when_registering_partial_for_unannotated_parameter() -> None:
     spec = Specification()
-    container = RuntimeContainer(spec)
+    container = Container(spec)
 
     with pytest.raises(MissingConstructorKeywordTypeAnnotationError):
         container.resolve(UnannotatedGreeter)
@@ -174,7 +173,7 @@ def test_it_can_resolve_when_all_args_have_registered_partials() -> None:
     def build_greeter_name() -> str:
         return "foo"
 
-    container = RuntimeContainer(spec)
+    container = Container(spec)
     greeter = container.resolve(Greeter)
     assert isinstance(greeter, Greeter)
 
@@ -190,7 +189,7 @@ def test_it_prefers_partial_builders_to_default_args() -> None:
     def build_default_greeter() -> str:
         return "override"
 
-    container = RuntimeContainer(spec)
+    container = Container(spec)
     greeter = container.resolve(DefaultGreeter)
 
     assert isinstance(greeter, DefaultGreeter)
@@ -227,7 +226,7 @@ def test_it_can_build_types_based_on_annotations() -> None:
     def build_og_bucket() -> OpenGraphImagesBucket:
         return CloudBucket("do:og-images")
 
-    container = RuntimeContainer(spec)
+    container = Container(spec)
 
     user_service = container.resolve(UserService)
     assert user_service.bucket.path == "s3:profile_pictures"
@@ -248,7 +247,7 @@ def test_it_supplies_builders_with_args_from_the_container() -> None:
     def build_api_client(config: ConfigStore) -> ApiClient:
         return ApiClient(config.get("token"))
 
-    container = RuntimeContainer(spec)
+    container = Container(spec)
     instance = container.resolve(ApiClient)
 
     assert instance.base == "test"
@@ -261,13 +260,12 @@ class ConsumesApiClient:
 
 
 def test_it_supplies_nested_builders_with_args_from_the_container() -> None:
-    spec = Specification()
+    container = Container()
 
-    @spec.add
+    @container.add
     def build_api_client(config: ConfigStore) -> ApiClient:
         return ApiClient(config.get("api_base"))
 
-    container = RuntimeContainer(spec)
     instance = container.resolve(ConsumesApiClient)
 
     assert instance.api.base == "test"

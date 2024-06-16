@@ -12,7 +12,9 @@ from diy.internal.plan import (
 
 
 class DiyError(Exception):
-    pass
+    """
+    The base error, that all diy errors extend from.
+    """
 
 
 class UninstanciableTypeError(DiyError):
@@ -138,7 +140,9 @@ class MissingConstructorKeywordTypeAnnotationError(DiyError):
 class InvalidConstructorKeywordArgumentError(DiyError):
     def __init__(
         self,
-        abstract: type[Any], name: str, provided: type[Any] | str,
+        abstract: type[Any],
+        name: str,
+        provided: type[Any] | str,
         required: type[Any],
     ) -> None:
         target = f"{qualified_name(abstract)}::{name}"

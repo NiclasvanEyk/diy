@@ -203,7 +203,9 @@ class Specification(SpecificationProtocol):
         raise TypeError(message)
 
     @override
-    def get(self, abstract: type[Any], name: str | None) -> Callable[..., Any] | None:  # type: ignore
+    def get(
+        self, abstract: type[Any], name: str | None = None
+    ) -> Callable[..., Any] | None:
         if name is None:
             return self.builders.get(abstract)
 

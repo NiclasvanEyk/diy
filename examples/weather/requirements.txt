@@ -1,9 +1,0 @@
--e ../..
--e .
-httpx
-fastapi
-click
-numpy
-pytest
-pytest-cov
-ruff

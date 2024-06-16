@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any, Protocol, overload, runtime_checkable
 
@@ -60,6 +60,17 @@ class SpecificationProtocol(Protocol):
         self, abstract: type[T], name: str | None = None
     ) -> Callable[..., T] | None:
         pass
+
+    # TODO: This might make sense. A simple implementation would just add a
+    # builder function that takes one argument (the concrete type) and somehow
+    # dynamically annotates the return-type (or otherwise binds it in the
+    # container). Maybe an additional lookup dict would improve performance / 
+    # could be used for introspection purposes?
+    # @abstractmethod
+    # def bind[Abstract: (Protocol | ABC), Concrete](
+    #     self, abstract: type[Abstract], concrete: type[Concrete]
+    # ) -> None:
+    #     pass
 
     @abstractmethod
     def types(self) -> set[type[Any]]:

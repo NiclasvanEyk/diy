@@ -46,7 +46,7 @@ clutter your code with `Annotated` or other library specific markers.
    # "Oh, hi Mark!"
    ```
 
-This quickstart is a bit abstract and not that impressive.
+This example is a bit abstract and not that impressive.
 
 If you are not familiar with dependency injection containers, you may want to
 have a look at the (weather example application)[/examples/weather]. It
