@@ -13,8 +13,16 @@ from diy.internal.planner import Planner
 
 
 @root.command
-@option("--container", type=CONTAINER_IMPORT_SPECIFIER)
-@option("--subject", type=IMPORT_SPECIFIER)
+@option(
+    "--container",
+    type=CONTAINER_IMPORT_SPECIFIER,
+    help="The container that the subject should be resolved from",
+)
+@option(
+    "--subject",
+    type=IMPORT_SPECIFIER,
+    help="A type or function that we should plan the resolution or call for",
+)
 def plan(container: ContainerProtocol | None = None, subject: Any = None) -> None:
     """
     Test how the given SUBJECT would be resolved.

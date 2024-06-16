@@ -13,8 +13,9 @@ class MissingColon:
     pass
 
 
+@dataclass
 class MultipleColons:
-    pass
+    amount: int
 
 
 @dataclass
@@ -39,6 +40,21 @@ type FailureReason = (
 )
 
 
+def message(reason: FailureReason) -> str:
+    match reason:
+        case UnsupportedRelativeImport():
+            return "relative imports are not supported"
+        case MissingColon():
+            return "an import specifier needs to contain at least one ':'. Use the form my.module:value to refer to a value from a specific module"
+        case MultipleColons(amount):
+            return f"an import specifier must contain exactly one ':', but yours contained {amount}"
+        case ImportFailed(module_name, error):
+            return f"Failed to import '{module_name}': {error!r}"
+        case SymbolNotFound(module_name, symbol_name, symbols):
+            known = "\n".join([f"- {symbol}" for symbol in symbols])
+            return f"Could not find '{symbol_name}' in module '{module_name}'.\nFound:\n{known}"
+
+
 def resolve_import_specifier(
     specifier: str,
 ) -> Result[tuple[ModuleType, object], FailureReason]:
@@ -56,7 +72,7 @@ def resolve_import_specifier(
         return Err(MissingColon())
         # return "an import specifier needs to contain at least one ':'. Use the form my.module:value to refer to a value from a specific module"
     if len(parts) > 2:
-        return Err(MultipleColons())
+        return Err(MultipleColons(len(parts)))
         # return f"an import specifier must contain exactly one ':', but yours contained {len(parts)}"
 
     module_name, symbol_name = parts

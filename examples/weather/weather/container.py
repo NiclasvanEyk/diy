@@ -20,7 +20,12 @@ def build_constant_weather_client() -> ConstantWeatherClient:
     )
 
 
-container.add(WeatherApiWeatherClient)
+@container.add(WeatherApiWeatherClient, "key")
+def build_weather_api_weather_client_key() -> str:
+    if "WEATHERAPIDOTCOM_KEY" not in environ:
+        message = "WEATHERAPIDOTCOM_KEY needs to be defined in the environment!"
+        raise Exception(message)
+    return str(environ["WEATHERAPIDOTCOM_KEY"])
 
 
 # This function tells us how our application builds a client returning random
