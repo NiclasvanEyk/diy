@@ -30,6 +30,17 @@ class DefaultParameterResolutionPlan[T](ParameterResolutionPlanBase[T]):
 
 
 @dataclass
+class NoArgsConstructorParameterResolutionPlan[T](ParameterResolutionPlanBase[T]):
+    """
+    A parameter that is resolved by simply constructing the constructor
+    without any arguments.
+    """
+
+    def execute(self) -> T:
+        return self.type()
+
+
+@dataclass
 class BuilderParameterResolutionPlan[**P, T](ParameterResolutionPlanBase[T]):
     """
     A parameter that is resolved by calling its builder.
@@ -67,6 +78,9 @@ class InferenceParameterResolutionPlan[T](ParameterResolutionPlanBase[T]):
                 case DefaultParameterResolutionPlan():
                     pass
 
+                case NoArgsConstructorParameterResolutionPlan():
+                    kwargs[plan.name] = plan.execute()
+
                 case BuilderParameterResolutionPlan():
                     kwargs[plan.name] = plan.execute()
 
@@ -80,6 +94,7 @@ type ParameterResolutionPlan[**P, T] = (
     BuilderParameterResolutionPlan[P, T]
     | InferenceParameterResolutionPlan[T]
     | DefaultParameterResolutionPlan[T]
+    | NoArgsConstructorParameterResolutionPlan[T]
 )
 
 
@@ -130,7 +145,7 @@ class InferenceBasedResolutionPlan[T]:
         the function returns, or an instance of the requested type.
         """
         args, kwargs = resolve_parameter_plans(self.parameters)
-        return self.type(*args, **kwargs)  # type: ignore
+        return self.type(*args, **kwargs)
 
 
 @dataclass
@@ -182,6 +197,8 @@ def resolve_parameter_plans[T](
         match plan:
             case DefaultParameterResolutionPlan():
                 pass
+            case NoArgsConstructorParameterResolutionPlan():
+                kwargs[plan.name] = plan.execute()
             case BuilderParameterResolutionPlan():
                 kwargs[plan.name] = plan.execute()
             case InferenceParameterResolutionPlan():

@@ -19,7 +19,7 @@ class ImportSpecifierParamType(ParamType):
         if isinstance(result, Err):
             self.fail(message(result.error), param, ctx)
 
-        return result.value
+        return result.value[1]
 
 
 IMPORT_SPECIFIER = ImportSpecifierParamType()

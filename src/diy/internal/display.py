@@ -12,6 +12,7 @@ from diy.internal.plan import (
     BuilderParameterResolutionPlan,
     CallableResolutionPlan,
     DefaultParameterResolutionPlan,
+    NoArgsConstructorParameterResolutionPlan,
     ParameterPlanList,
     ParameterResolutionPlan,
     ResolutionPlan,
@@ -70,12 +71,18 @@ def print_resolution_plan(
 ) -> str:
     if ansi is None:
         ansi = stdout.isatty()
+    if ansi is None:
+        ansi = False
 
     root_repr = ""
+
+    # Print the name
     if isinstance(plan, CallableResolutionPlan):
         root_repr = f"{plan.subject}"
     else:
         root_repr = f"{_print_qualified_name(plan.type, ansi)}"
+
+    # print how it is created
     if isinstance(plan, BuilderBasedResolutionPlan):
         name = _print_qualified_name(plan.builder, ansi)
         root_repr += f" <- {name}"
@@ -84,6 +91,8 @@ def print_resolution_plan(
     if isinstance(plan, BuilderBasedResolutionPlan):
         return root_repr
 
+    # If not, we need to recursively display the parameters and their
+    # resolution.
     children_repr = ""
 
     tree = deque(PlanDisplayContainer.map(plan.parameters))
@@ -99,11 +108,15 @@ def print_resolution_plan(
         if isinstance(child, BuilderParameterResolutionPlan):
             name = _print_qualified_name(child.builder, ansi)
             child_repr += f" <- {name}"
+        if isinstance(child, NoArgsConstructorParameterResolutionPlan):
+            child_repr += f" <- {child.type.__name__}()"
         children_repr += f"\n{child_repr}"
 
         if isinstance(child, DefaultParameterResolutionPlan):
             continue
         if isinstance(child, BuilderParameterResolutionPlan):
+            continue
+        if isinstance(child, NoArgsConstructorParameterResolutionPlan):
             continue
 
         for unit in reversed(PlanDisplayContainer.map(child.parameters)):

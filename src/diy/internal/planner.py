@@ -15,6 +15,7 @@ from diy.internal.plan import (
     DefaultParameterResolutionPlan,
     InferenceBasedResolutionPlan,
     InferenceParameterResolutionPlan,
+    NoArgsConstructorParameterResolutionPlan,
 )
 from diy.internal.validation import assert_is_typelike, is_typelike
 from diy.specification.protocol import SpecificationProtocol
@@ -98,26 +99,10 @@ class Planner:
             if isinstance(
                 parent, InferenceParameterResolutionPlan | InferenceBasedResolutionPlan
             ):
-                parent_type = parent.type
-                if is_typelike(parent_type):
-                    partial_builder = self.spec.get(parent_type, name)
-                    if partial_builder is not None:
-                        return_type = signature(partial_builder).return_annotation
-                        assert return_type is not Parameter.empty
-                        args_plan = self.plan_call(partial_builder)
-                        parent.parameters.append(
-                            BuilderParameterResolutionPlan(
-                                name,
-                                depth + 1,
-                                type=return_type,
-                                parent=parent,
-                                builder=partial_builder,
-                                args_plan=args_plan,
-                            )
-                        )
-                        continue
-            else:
-                pass
+                plan = self._try_builder_based_resolution(parent, name, depth)
+                if plan is not None:
+                    parent.parameters.append(plan)
+                    continue
 
             # If the parameter has a default, it is preferrable
             if parameter.default is not Parameter.empty:
@@ -171,8 +156,56 @@ class Planner:
                 type=abstract,
                 parent=parent,  # type: ignore[reportArgumentType]
             )
+            self._fill_plan_based_on_inference(abstract.__init__, plan, root)
+
+            # Optimization: If we only use default parameters, we can just call
+            # the default constructor with no arguments. Also makes the plans
+            # look nicer when displaying them.
+            if all(
+                isinstance(child, DefaultParameterResolutionPlan)
+                for child in plan.parameters
+            ):
+                plan = NoArgsConstructorParameterResolutionPlan(
+                    name=name,
+                    depth=depth + 1,
+                    type=abstract,
+                    parent=parent,  # type: ignore[reportArgumentType]
+                )
+
             parent.parameters.append(plan)
-            self._fill_plan_based_on_inference(abstract, plan, root)
+
+        # Now that we have all paramers resolve, we maybe can simplify some.
+        # TODO:
+        for plan in parent.parameters:
+            pass
+
+    def _try_builder_based_resolution(
+        self,
+        parent: InferenceParameterResolutionPlan[Any]
+        | InferenceBasedResolutionPlan[Any],
+        name: str,
+        depth: int,
+    ) -> BuilderParameterResolutionPlan[Any, Any] | None:
+        parent_type = parent.type
+        if not is_typelike(parent_type):
+            return None
+
+        partial_builder = self.spec.get(parent_type, name)
+        if partial_builder is None:
+            return None
+
+        return_type = signature(partial_builder).return_annotation
+        assert return_type is not Parameter.empty
+
+        args_plan = self.plan_call(partial_builder)
+        return BuilderParameterResolutionPlan(
+            name,
+            depth + 1,
+            type=return_type,
+            parent=parent,
+            builder=partial_builder,
+            args_plan=args_plan,
+        )
 
     def _get_requestor(self, parent: object) -> type[Any] | None:
         """
