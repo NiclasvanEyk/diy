@@ -5,46 +5,22 @@ description = "A dependency injection container utilizing type annotations."
 authors = [{ name = "Niclas van Eyk", email = "niclas.eyk@gmail.com" }]
 readme = "README.md"
 license = { file = "LICENSE.md" }
-classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
-  "Programming Language :: Python",
-]
 dependencies = ["click>=8.1.7"]
 requires-python = ">= 3.12"
 
-[project.urls]
-Homepage = "https://github.com/NiclasvanEyk/diy"
-Documentation = "https://diy.niclasve.me"
-Repository = "https://github.com/NiclasvanEyk/diy.git"
-Issues = "https://github.com/NiclasvanEyk/diy/issues"
-Changelog = "https://github.com/NiclasvanEyk/diy/blob/main/CHANGELOG.md"
-
-[project.scripts]
-diy = "diy.cli:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/diy"]
-
 [tool.rye]
+virtual = true
 managed = true
 dev-dependencies = [
-  "pytest>=8.1.1",
-  "ruff>=0.3.5",
-  "mkdocs-material>=9.5.17",
   "coverage>=7.4.4",
-  "mypy>=1.9.0",
-  "pyright>=1.1.362",
+  "griffe-inherited-docstrings>=1.0.0",
+  "mkdocs-material>=9.5.17",
+  "mkdocstrings[python]>=0.25.0",
+  "pyright>=1.1.368",
   "pytest-cov>=5.0.0",
   "pytest-watcher>=0.4.2",
-  "mkdocstrings[python]>=0.25.0",
-  "griffe-inherited-docstrings>=1.0.0",
+  "pytest>=8.1.1",
+  "ruff>=0.3.5",
 ]
 
 [tool.rye.scripts]
@@ -52,52 +28,10 @@ tests = "pytest --cov --cov-branch --doctest-modules tests/"
 docs = "mkdocs serve"
 
 [tool.rye.workspace]
-members = ["diy", "examples/*"]
-
-[tool.pytest]
-addopts = "--doctest-modules"
+members = ["packages/*", "examples/*"]
 
 [tool.coverage.run]
 omit = ["*_test.py"]
-
-[tool.ruff]
-src = ["src"]
-
-[tool.ruff.lint]
-preview = true
-select = [
-  "F",
-  "I",
-  "UP",
-  "N",
-  "YTT",
-  "ANN",
-  "ASYNC",
-  "S",
-  "BLE",
-  "B",
-  "C4",
-  "DTZ",
-  "T10",
-  "EM",
-  "FA",
-  "LOG",
-  "G",
-  "INP",
-  "PIE",
-  "T20",
-  "PT",
-  "RSE",
-  "RET",
-  "SLF",
-  "SIM",
-  "TID",
-  "PTH",
-  "PLE",
-  "FURB",
-  "RUF",
-]
-ignore = ["ANN101", "ANN401", "PT013", "S101", "RET504"]
 
 [tool.basedpyright]
 reportAny = false

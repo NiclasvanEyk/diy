@@ -1,0 +1,40 @@
+[project]
+name = "diy"
+version = "0.1.0"
+description = "A dependency injection container utilizing type annotations."
+authors = [{ name = "Niclas van Eyk", email = "niclas.eyk@gmail.com" }]
+readme = "README.md"
+license = { file = "../../LICENSE.md" }
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python",
+]
+dependencies = ["click>=8.1.7", "pyright>=1.1.368"]
+requires-python = ">= 3.12"
+
+[project.urls]
+Homepage = "https://github.com/NiclasvanEyk/diy"
+Documentation = "https://diy.niclasve.me"
+Repository = "https://github.com/NiclasvanEyk/diy.git"
+Issues = "https://github.com/NiclasvanEyk/diy/issues"
+Changelog = "https://github.com/NiclasvanEyk/diy/blob/main/CHANGELOG.md"
+
+[tool.pytest]
+addopts = "--doctest-modules"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.coverage.run]
+omit = ["*_test.py"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/diy"]

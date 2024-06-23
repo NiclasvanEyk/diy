@@ -1,0 +1,37 @@
+target-version = "py312"
+
+[lint]
+preview = true
+select = [
+  "F",
+  "I",
+  "UP",
+  "N",
+  "YTT",
+  "ANN",
+  "ASYNC",
+  "S",
+  "BLE",
+  "B",
+  "C4",
+  "DTZ",
+  "T10",
+  "EM",
+  "FA",
+  "LOG",
+  "G",
+  "INP",
+  "PIE",
+  "T20",
+  "PT",
+  "RSE",
+  "RET",
+  "SLF",
+  "SIM",
+  "TID",
+  "PTH",
+  "PLE",
+  "FURB",
+  "RUF",
+]
+ignore = ["ANN101", "ANN401", "PT013", "S101", "RET504"]

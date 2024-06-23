@@ -7,8 +7,10 @@
 #   all-features: false
 #   with-sources: false
 
--e file:.
 -e file:examples/weather
+-e file:packages/diy
+    # via diy-cli
+-e file:packages/diy_cli
 annotated-types==0.7.0
     # via pydantic
 anyio==4.4.0
@@ -101,9 +103,6 @@ mkdocstrings==0.25.0
     # via mkdocstrings-python
 mkdocstrings-python==1.9.2
     # via mkdocstrings
-mypy==1.9.0
-mypy-extensions==1.0.0
-    # via mypy
 nodeenv==1.8.0
     # via pyright
 numpy==1.26.4
@@ -132,7 +131,8 @@ pygments==2.17.2
 pymdown-extensions==10.7.1
     # via mkdocs-material
     # via mkdocstrings
-pyright==1.1.362
+pyright==1.1.368
+    # via diy
 pytest==8.1.1
     # via pytest-cov
     # via weather
@@ -175,7 +175,6 @@ typer==0.12.3
     # via fastapi-cli
 typing-extensions==4.11.0
     # via fastapi
-    # via mypy
     # via pydantic
     # via pydantic-core
     # via typer
