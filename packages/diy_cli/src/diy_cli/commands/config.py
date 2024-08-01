@@ -16,12 +16,13 @@ def config() -> None:
     """
     Prints the current configuration in JSON to the console.
 
+    \b
     Exit codes:
-    1       General error.
-    2       pyproject.toml not found.
-    3       pyproject.toml is missing a tools.diy section.
-    4       pyproject.toml has a tools.diy section, but it violates the
-            configuration schema.
+    1  General error.
+    2  pyproject.toml not found.
+    3  pyproject.toml is missing a tools.diy section.
+    4  pyproject.toml has a tools.diy section, but it violates the
+       configuration schema.
     """
 
     configuration = resolve_config()

@@ -39,14 +39,7 @@ def test_it_can_display_long_resolution_plans() -> None:
 
     plan = Planner(spec).plan(UserService)
 
-    snapshot = """tests.internal.display_test.UserService
-├─ api: tests.internal.display_test.ApiClient
-│  └─ http: tests.internal.display_test.HttpClient
-├─ mailer: tests.internal.display_test.Mailer
-│  ├─ transport: tests.internal.display_test.SmtpTransport
-│  │  └─ crypt: tests.internal.display_test.Encrypter
-│  └─ from_addr: str <- tests.internal.display_test.test_it_can_display_long_resolution_plans.<locals>.build_mailer_from_addr
-└─ logger: tests.internal.display_test.Logger"""
+    snapshot = """tests.internal.display_test:UserService\n├─api: tests.internal.display_test:ApiClient\n│  └─http: tests.internal.display_test:HttpClient <- HttpClient()\n├─mailer: tests.internal.display_test:Mailer\n│  ├─transport: tests.internal.display_test:SmtpTransport\n│  │  └─crypt: tests.internal.display_test:Encrypter <- Encrypter()\n│  └─from_addr: str <- tests.internal.display_test:test_it_can_display_long_resolution_plans.<locals>.build_mailer_from_addr\n└─logger: tests.internal.display_test:Logger <- Logger()"""
 
     actual = print_resolution_plan(plan, ansi=False)
 

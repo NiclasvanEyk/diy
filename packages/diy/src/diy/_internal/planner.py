@@ -66,7 +66,7 @@ class Planner:
             sig = signature(subject, eval_str=True)
         except ValueError as exception:
             assert isinstance(parent, InferenceParameterResolutionPlan)
-            raise FailedToInferDependencyError(root, parent) from exception  # type: ignore[reportArgumentType]
+            raise FailedToInferDependencyError(parent, root) from exception  # type: ignore[reportArgumentType]
 
         for name, parameter in sig.parameters.items():
             # TODO: This can definitely be done better
@@ -144,6 +144,9 @@ class Planner:
                     )
                 )
                 continue
+
+            if abstract.__module__ == "builtins":
+                raise FailedToInferDependencyError(parent, root, name)
 
             # As a last fallback, we inspect the constructor of the type in
             # question and see if we can build all parameters. This recurses

@@ -30,31 +30,32 @@ class UnsupportedParameterTypeError(DiyError):
     pass
 
 
-class FailedToInferDependencyError(DiyError):
+class FailedToInferDependencyError[**P, T](DiyError):
     def __init__(
         self,
-        plan: InferenceBasedResolutionPlan[Any] | CallableResolutionPlan[..., Any],
-        parent: InferenceParameterResolutionPlan[Any],
+        parent: InferenceParameterResolutionPlan[T]
+        | InferenceBasedResolutionPlan[T]
+        | CallableResolutionPlan[P, T],
+        root: InferenceBasedResolutionPlan[Any] | CallableResolutionPlan[P, T],
+        parameter: str | None = None,
     ) -> None:
-        # TODO: We actually need parent.parent.type here. But that is not available (yet)
+        self.parent = parent
+        self.root = root
         message = (
-            f"Failed to infer parameter {parent.name} for {qualified_name(parent.type)}"
+            f"Failed to infer parameter {parameter} of {qualified_name(self.subject)}"
         )
         super().__init__(message)
-        self.parent = parent
-        self.plan = plan
-        printed_plan = print_resolution_plan(plan)
+        printed_plan = print_resolution_plan(root)
         # TODO: The plan is somewhat helpful here, but we should hint to the
         #       developer at which point of the plan this exception originates
         self.add_note(f"\n{printed_plan}")
 
     @property
     def subject(self) -> type[Any] | Callable[..., Any]:
-        grandparent = self.parent.parent
-        if isinstance(grandparent, CallableResolutionPlan):
-            return grandparent.subject
+        if isinstance(self.parent, CallableResolutionPlan):
+            return self.parent.subject
 
-        return grandparent.type
+        return self.parent.type
 
 
 class UnresolvableDependencyError(DiyError):

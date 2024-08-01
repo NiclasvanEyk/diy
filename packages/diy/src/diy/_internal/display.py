@@ -31,19 +31,27 @@ def fully_qualify(abstract: type[Any] | Callable[..., Any]) -> FQN:
     return (module, name)
 
 
-def join_qualified_name(fqn: FQN) -> str:
+def join_qualified_name(fqn: FQN, ansi: bool) -> str:
     (module, name) = fqn
-    return name if module is None else f"{module}.{name}"
+    if module is None:
+        return name
+
+    prefix = gray(f"{module}:", ansi)
+    return f"{prefix}{name}"
 
 
-def qualified_name(abstract: str | type[Any] | Callable[..., Any]) -> str:
+def qualified_name(
+    abstract: str | type[Any] | Callable[..., Any], ansi: bool = False
+) -> str:
     if isinstance(abstract, UnionType):
-        return " | ".join([qualified_name(t) for t in abstract.__args__])  # type: ignore[generalTypeIssues]
+        return f" {gray('|', ansi)} ".join(
+            [qualified_name(t) for t in abstract.__args__]
+        )  # type: ignore[generalTypeIssues]
 
     if isinstance(abstract, str):
         return abstract
 
-    return join_qualified_name(fully_qualify(abstract))
+    return join_qualified_name(fully_qualify(abstract), False)
 
 
 @dataclass
@@ -66,6 +74,21 @@ def bold(subject: str, ansi: bool) -> str:
     return f"\033[1m{subject}\033[0m"
 
 
+def gray(subject: str, ansi: bool) -> str:
+    if not ansi:
+        return subject
+    return f"\x1b[38;5;7m{subject}\033[0m"
+
+
+@dataclass
+class PlanDecoration:
+    clazz: str
+    abstract: str
+    function: str
+    parameter: str
+    constructor: str
+
+
 def print_resolution_plan(
     plan: ResolutionPlan[..., Any], ansi: bool | None = None
 ) -> str:
@@ -80,7 +103,7 @@ def print_resolution_plan(
     if isinstance(plan, CallableResolutionPlan):
         root_repr = f"{plan.subject}"
     else:
-        root_repr = f"{_print_qualified_name(plan.type, ansi)}"
+        root_repr = _print_qualified_name(plan.type, ansi)
 
     # print how it is created
     if isinstance(plan, BuilderBasedResolutionPlan):
@@ -101,15 +124,15 @@ def print_resolution_plan(
         child = unit.node
 
         param_repr = _display_param(child.name, child.type, ansi)
-        padding = "│  " if len(tree) > 0 else "   "
-        child_repr = padding * child.depth
-        child_repr += f"{"└" if unit.is_last else "├"}─"
-        child_repr += f" {param_repr}"
+        padding = f"{gray('│', ansi)}  " if len(tree) > 0 else "   "
+        child_repr = "" + padding * child.depth
+        child_repr += gray(f"{"└" if unit.is_last else "├"}─", ansi)
+        child_repr += f"{param_repr}"
         if isinstance(child, BuilderParameterResolutionPlan):
             name = _print_qualified_name(child.builder, ansi)
-            child_repr += f" <- {name}"
+            child_repr += f" {gray('<-', ansi)} {name}"
         if isinstance(child, NoArgsConstructorParameterResolutionPlan):
-            child_repr += f" <- {child.type.__name__}()"
+            child_repr += f" {gray('<-', ansi)} {child.type.__name__}()"
         children_repr += f"\n{child_repr}"
 
         if isinstance(child, DefaultParameterResolutionPlan):
@@ -137,7 +160,7 @@ def _print_qualified_name(
         (type_module, type_name) = (None, "Unknown")
 
     type_name = bold(type_name, ansi)
-    return join_qualified_name((type_module, type_name))
+    return join_qualified_name((type_module, type_name), ansi)
 
 
 def _display_param(name: str, param_type: type[Any] | None, ansi: bool) -> str:

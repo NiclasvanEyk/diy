@@ -1,6 +1,7 @@
+from collections.abc import Callable
 from typing import Any
 
-from click import echo, option
+from click import argument, echo, option
 from diy._internal.display import print_resolution_plan
 from diy._internal.planner import Planner
 from diy.container.protocol import ContainerProtocol
@@ -18,20 +19,26 @@ from diy_cli.utils.result import Err
     type=CONTAINER_IMPORT_SPECIFIER,
     help="The container that the subject should be resolved from",
 )
-@option(
-    "--subject",
+@argument(
+    "subject",
     type=IMPORT_SPECIFIER,
-    help="A type or function that we should plan the resolution or call for",
+    required=False,
+    # help="A type or function that we should plan the resolution or call for",
 )
-def plan(container: ContainerProtocol | None = None, subject: Any = None) -> None:
+def show(
+    container: ContainerProtocol | None = None,
+    subject: None | type | Callable[..., Any] | str = None,
+) -> None:
     """
-    Test how the given SUBJECT would be resolved.
+    Show how the given SUBJECT would be resolved. If omitted, all types and
+    functions known by the container are listed.
 
-    If SUBJECT refers to a type, it refers to how a new instance would be
-    constructed. If it refers to a function, it describes how it would be
-    called.
+    Subject is an import specifier, e.g. "app.services:MyService". If SUBJECT
+    refers to a type, it refers to how a new instance would be constructed. If
+    it refers to a function, it describes how it would be called.
 
-    You may reference a container, or configure one in your config.
+    If you do not specify a container explicitly, the default one from the
+    project configuration will be used.
     """
 
     if container is None:

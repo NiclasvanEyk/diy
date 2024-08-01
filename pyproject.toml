@@ -24,7 +24,7 @@ dev-dependencies = [
 ]
 
 [tool.rye.scripts]
-tests = "pytest --cov --cov-branch --doctest-modules tests/"
+tests = "pytest --cov --cov-branch packages"
 docs = "mkdocs serve"
 
 [tool.rye.workspace]

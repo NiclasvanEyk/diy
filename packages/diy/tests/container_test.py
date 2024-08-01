@@ -5,6 +5,7 @@ from typing import Annotated, Any
 import pytest
 
 from diy import Container, Specification
+from diy._internal.display import print_resolution_plan
 from diy.errors import (
     FailedToInferDependencyError,
     MissingConstructorKeywordTypeAnnotationError,
@@ -109,13 +110,12 @@ class ImplicitlyResolvesApiClient:
 def test_container_can_implicitly_resolve_argument_that_are_contained_in_the_spec() -> (
     None
 ):
-    spec = Specification()
+    container = Container()
 
-    @spec.add
+    @container.add
     def build_api_client() -> ApiClient:
         return ApiClient("test")
 
-    container = Container(spec)
     instance = container.resolve(ImplicitlyResolvesApiClient)
     assert isinstance(instance, ImplicitlyResolvesApiClient)
 
@@ -127,9 +127,7 @@ class Greeter:
 
 
 def test_it_throws_when_type_cannot_be_resolved() -> None:
-    spec = Specification()
-    container = Container(spec)
-
+    container = Container()
     with pytest.raises(FailedToInferDependencyError):
         container.resolve(Greeter)
 
