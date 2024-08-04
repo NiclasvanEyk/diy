@@ -38,6 +38,6 @@ jobs:
         with:
           extra-args: packages/diy_cli
       - name: Lint
-        run: ruff check --output-format=github
+        run: ./.venv/bin/ruff check --output-format=github
       - name: Format
-        run: ruff format --diff
+        run: ./.venv/bin/ruff format --diff
