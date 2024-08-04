@@ -45,8 +45,8 @@ def qualified_name(
 ) -> str:
     if isinstance(abstract, UnionType):
         return f" {gray('|', ansi)} ".join(
-            [qualified_name(t) for t in abstract.__args__]
-        )  # type: ignore[generalTypeIssues]
+            [qualified_name(t) for t in abstract.__args__]  # type: ignore[generalTypeIssues]
+        )
 
     if isinstance(abstract, str):
         return abstract

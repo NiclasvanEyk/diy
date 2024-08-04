@@ -36,7 +36,7 @@ class FailedToInferDependencyError[**P, T](DiyError):
         parent: InferenceParameterResolutionPlan[T]
         | InferenceBasedResolutionPlan[T]
         | CallableResolutionPlan[P, T],
-        root: InferenceBasedResolutionPlan[Any] | CallableResolutionPlan[P, T],
+        root: InferenceBasedResolutionPlan[Any] | CallableResolutionPlan[..., Any],
         parameter: str | None = None,
     ) -> None:
         self.parent = parent

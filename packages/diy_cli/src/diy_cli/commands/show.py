@@ -71,7 +71,7 @@ def show(
             exit(1)
         container = result.value
 
-    planner = container._planner  # noqa: SLF001
+    planner = container._planner  # noqa: SLF001  # type: ignore
     if not isinstance(planner, Planner):
         echo(
             f"_planner attribute of {container!r} does not contain an instance of diy.Planner!"
@@ -79,11 +79,11 @@ def show(
 
     if format == DisplayFormat.TEXT:
         if subject is not None:
-            _display_text_plan(subject)
+            _display_text_plan(planner, subject)
             return
 
         for subject in planner.spec.types():
-            _display_text_plan(subject)
+            _display_text_plan(planner, subject)
             echo("")
     else:
         if subject is not None:
@@ -104,8 +104,8 @@ def _get_plan[T](planner: Planner, subject: T) -> ResolutionPlan[..., T]:
     return planner.plan(type(subject))
 
 
-def _display_text_plan(subject: Any) -> None:
-    echo(print_resolution_plan(_get_plan(subject)))
+def _display_text_plan(planner: Planner, subject: Any) -> None:
+    echo(print_resolution_plan(_get_plan(planner, subject)))
 
 
 def _display_all_plans_in_json(planner: Planner) -> None:

@@ -55,13 +55,13 @@ class Container(ContainerProtocol, SpecificationProtocol):
     def add[T](
         self, builder: Callable[..., Any] | type[T], name: str | None = None
     ) -> Callable[..., Any] | None:
-        return self._spec.add(builder, name)
+        return self._spec.add(builder, name)  # type: ignore
 
     @override
     def get[T](
         self, abstract: type[T], name: str | None = None
     ) -> Callable[..., T] | None:
-        return self._spec.get(abstract, name)
+        return self._spec.get(abstract, name)  # type: ignore
 
     @override
     def types(self) -> set[type[Any]]:

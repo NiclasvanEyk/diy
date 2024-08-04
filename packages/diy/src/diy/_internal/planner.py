@@ -146,7 +146,7 @@ class Planner:
                 continue
 
             if abstract.__module__ == "builtins":
-                raise FailedToInferDependencyError(parent, root, name)
+                raise FailedToInferDependencyError(parent, root, name)  # type: ignore
 
             # As a last fallback, we inspect the constructor of the type in
             # question and see if we can build all parameters. This recurses

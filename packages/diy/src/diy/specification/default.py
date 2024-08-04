@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable
-from typing import Any, override
+from typing import Any, overload, override
 
 from diy._internal.validation import (
     assert_annotates_return_type,
@@ -182,6 +182,29 @@ class Specification(SpecificationProtocol):
         self.builders = Builders()
         self.partials = Partials()
         self._explicitly_registered_types = set()
+
+    @overload
+    def add[T](self, builder: Callable[..., T]) -> Callable[..., T]:
+        """
+        Mark an existing function as a builder for an abstract type.
+        """
+
+    @overload
+    def add[T](self, builder: type[T], name: str) -> Callable[..., T]:
+        """
+        Mark the function as a supplier for the named constructor parameter of
+        the given type.
+        """
+
+    @overload
+    def add(self, builder: type[Any]) -> None:
+        """
+        Simply tell the container, that this type exists.
+
+        This helps containers to verify that this type should be "buildable" in
+        the future. This means that all its parameters should have known
+        constructors.
+        """
 
     @override
     def add[T](

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from tomllib import loads as load_toml
+from typing import Any
 
 from diy_cli.config.schema import DiyProjectConfig
 from diy_cli.utils.result import Err, Ok, Result
@@ -17,7 +18,7 @@ class MissingDiyToolSection:
 
 @dataclass
 class ViolatesSchema:
-    config: dict
+    config: dict[str, Any]
     error: Exception
 
 
@@ -26,8 +27,8 @@ type FailedToResolveProjectConfig = (
 )
 
 
-def message_and_exit_code(error: FailedToResolveProjectConfig) -> tuple[str, int]:
-    match error:
+def message_and_exit_code(thrown: FailedToResolveProjectConfig) -> tuple[str, int]:
+    match thrown:
         case MissingPyprojectFile():
             return ("diy is not configured! Could not find a pyproject.toml file.", 2)
         case MissingDiyToolSection():
@@ -35,9 +36,9 @@ def message_and_exit_code(error: FailedToResolveProjectConfig) -> tuple[str, int
                 "diy is not configured! Add a [tools.diy] section to your pyproject.toml",
                 3,
             )
-        case ViolatesSchema(values, error):
+        case ViolatesSchema(config, error):
             return (
-                f"Invalid diy configuration!\n\nconfig: \n{values}\n\nerror: {error!r}",
+                f"Invalid diy configuration!\n\nconfig: \n{config}\n\nerror: {error!r}",
                 4,
             )
 
