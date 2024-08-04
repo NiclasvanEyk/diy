@@ -5,7 +5,6 @@ from typing import Annotated, Any
 import pytest
 
 from diy import Container, Specification
-from diy._internal.display import print_resolution_plan
 from diy.errors import (
     FailedToInferDependencyError,
     MissingConstructorKeywordTypeAnnotationError,

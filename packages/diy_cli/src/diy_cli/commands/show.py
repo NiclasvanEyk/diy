@@ -88,7 +88,8 @@ def show(
     else:
         if subject is not None:
             # TODO: Implement this
-            raise Exception("Not implemented yet!")
+            message = "Not implemented yet!"
+            raise Exception(message)
 
         _display_all_plans_in_json(planner)
 

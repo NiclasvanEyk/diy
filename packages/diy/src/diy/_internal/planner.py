@@ -179,8 +179,8 @@ class Planner:
 
         # Now that we have all paramers resolve, we maybe can simplify some.
         # TODO:
-        for plan in parent.parameters:
-            pass
+        # for plan in parent.parameters:
+        #    pass
 
     def _try_builder_based_resolution(
         self,

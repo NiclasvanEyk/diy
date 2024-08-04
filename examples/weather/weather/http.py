@@ -14,7 +14,7 @@ class InvalidCityResponse:
     error: str
 
 
-def FromContainer[T](dependency: type[T]):
+def FromContainer[T](dependency: type[T]) -> Depends:  # noqa: N802
     def dependency_resolver() -> T:
         return container.resolve(dependency)
 

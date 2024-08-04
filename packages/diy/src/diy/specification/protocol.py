@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from collections.abc import Callable
 from typing import Any, Protocol, overload, runtime_checkable
 

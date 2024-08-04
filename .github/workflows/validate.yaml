@@ -33,7 +33,10 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - uses: jakebailey/pyright-action@v2
         with:
-          extra-args: src
+          extra-args: packages/diy
+      - uses: jakebailey/pyright-action@v2
+        with:
+          extra-args: packages/diy_cli
       - name: Lint
         run: ruff check --output-format=github
       - name: Format

@@ -1,6 +1,7 @@
 from os import environ
 
 from diy import Container
+
 from weather.client.constant import ConstantWeatherClient
 from weather.client.protocol import Condition, CurrentWeather, WeatherClient
 from weather.client.random import RandomWeatherClient

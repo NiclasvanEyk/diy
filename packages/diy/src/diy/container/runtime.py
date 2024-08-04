@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from typing import override
 
-from diy.container.protocol import ContainerProtocol
 from diy._internal.planner import Planner
+from diy.container.protocol import ContainerProtocol
 from diy.specification.default import Specification
 from diy.specification.protocol import SpecificationProtocol
 

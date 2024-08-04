@@ -3,9 +3,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import override
 
-from diy.container.protocol import ContainerProtocol
 from diy._internal.planner import Planner
 from diy._internal.verification import verify_specification
+from diy.container.protocol import ContainerProtocol
 from diy.specification.protocol import SpecificationProtocol
 
 
