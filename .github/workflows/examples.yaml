@@ -25,7 +25,7 @@ jobs:
         working-directory: ./examples/weather
         run: |
           cd examples/weather
-          uv pip install -r requirements.txt
+          uv pip install --system -r requirements.txt
       - name: Test
         working-directory: ./examples/weather
         run: pytest --cov --cov-branch --doctest-modules

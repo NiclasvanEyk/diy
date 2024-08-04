@@ -22,7 +22,7 @@ jobs:
           python-version: 3.x
       - uses: yezz123/setup-uv@v4
       - run: |
-          uv pip install -r requirements.lock -r requirements-dev.lock
+          uv pip install --system -r requirements.lock -r requirements-dev.lock
           mkdocs build
       - uses: actions/upload-pages-artifact@v1
         with:
