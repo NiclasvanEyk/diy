@@ -20,12 +20,12 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: yezz123/setup-uv@v4
       - name: Install dependencies
         working-directory: ./examples/weather
         run: |
           cd examples/weather
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          uv pip install -r requirements.txt
       - name: Test
         working-directory: ./examples/weather
         run: pytest --cov --cov-branch --doctest-modules

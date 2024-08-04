@@ -20,8 +20,9 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
+      - uses: yezz123/setup-uv@v4
       - run: |
-          pip install -r requirements.lock -r requirements-dev.lock
+          uv pip install -r requirements.lock -r requirements-dev.lock
           mkdocs build
       - uses: actions/upload-pages-artifact@v1
         with:
