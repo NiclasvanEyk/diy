@@ -23,9 +23,11 @@ jobs:
       - uses: yezz123/setup-uv@v4
       - name: Install dependencies
         run: |
-          uv pip install --system -r requirements.lock -r requirements-dev.lock
+          curl -sSf https://rye.astral.sh/get | bash
+          rye sync
+          . ./.venv/bin/activate
       - name: Test
-        run: pytest --cov --cov-branch --doctest-modules ./tests/
+        run: rye run tests
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:

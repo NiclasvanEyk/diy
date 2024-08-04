@@ -17,7 +17,7 @@ Homepage = "https://github.com/NiclasvanEyk/diy"
 Documentation = "https://diy.niclasve.me"
 Repository = "https://github.com/NiclasvanEyk/diy.git"
 Issues = "https://github.com/NiclasvanEyk/diy/issues"
-Changelog = "https://github.com/NiclasvanEyk/diy/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/NiclasvanEyk/diy/blob/main/packages/diy/CHANGELOG.md"
 
 [tool.pytest]
 addopts = "--doctest-modules"
