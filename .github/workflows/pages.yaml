@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - uses: eifinger/setup-rye@v2
+      - uses: eifinger/setup-rye@v4
       - run: |
           rye sync
           rye run docs:build
