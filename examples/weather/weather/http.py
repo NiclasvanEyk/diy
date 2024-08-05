@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI
 
@@ -14,7 +14,7 @@ class InvalidCityResponse:
     error: str
 
 
-def FromContainer[T](dependency: type[T]) -> Depends:  # noqa: N802
+def FromContainer[T](dependency: type[T]) -> Any:  # noqa: N802
     def dependency_resolver() -> T:
         return container.resolve(dependency)
 
