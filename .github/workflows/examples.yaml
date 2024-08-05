@@ -22,20 +22,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: eifinger/setup-rye@v4
       - name: Install workspace dependencies
-        run: |
-          rye sync
-          . ./.venv/bin/activate
-      - name: Install dependencies
-        working-directory: ./examples/weather
-        run: |
-          uv pip install -r requirements.txt
+        run: rye sync
       - name: Test
         working-directory: ./examples/weather
-        run: pytest --cov --cov-branch --doctest-modules
+        run: ../../.venv/bin/pytest --cov --cov-branch --doctest-modules
       - uses: jakebailey/pyright-action@v2
       - name: Lint
         working-directory: ./examples/weather
-        run: ruff check --output-format=github
+        run: ../../.venv/bin/ruff check --output-format=github
       - name: Format
         working-directory: ./examples/weather
-        run: ruff format --diff
+        run: ../../.venv/bin/ruff format --diff
