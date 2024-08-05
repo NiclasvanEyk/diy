@@ -64,7 +64,7 @@ class SpecificationProtocol(Protocol):
     # TODO: This might make sense. A simple implementation would just add a
     # builder function that takes one argument (the concrete type) and somehow
     # dynamically annotates the return-type (or otherwise binds it in the
-    # container). Maybe an additional lookup dict would improve performance / 
+    # container). Maybe an additional lookup dict would improve performance /
     # could be used for introspection purposes?
     # @abstractmethod
     # def bind[Abstract: (Protocol | ABC), Concrete](
